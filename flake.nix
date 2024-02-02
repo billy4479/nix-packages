@@ -20,6 +20,7 @@
 
       packages = {
         packwiz-installer = pkgs.callPackage ./packwiz-installer {};
+        apple-fonts = pkgs.callPackage ./apple-fonts {};
       };
     });
 }
