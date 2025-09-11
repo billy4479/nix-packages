@@ -9,11 +9,11 @@ let
   urlsAndShas = {
     sf-pro = {
       url = "https://devimages-cdn.apple.com/design/resources/download/SF-Pro.dmg";
-      sha256 = "sha256-090HwtgILtK/KGoOzcwz1iAtoiShKAVjiNhUDQtO+gQ=";
+      sha256 = "sha256-8Dkh9ih3NUoKQXyGkmg44OMGUXK9gBnIsfbpGL8uNPc=";
     };
     sf-compact = {
       url = "https://devimages-cdn.apple.com/design/resources/download/SF-Compact.dmg";
-      sha256 = "sha256-z70mts7oFaMTt4q7p6M7PzSw4auOEaiaJPItYqUpN0A=";
+      sha256 = "sha256-gKTztcBhUYR+VoV4cPED6ESu7slRzcQtLAQhBOY9CCk=";
     };
     sf-mono = {
       url = "https://devimages-cdn.apple.com/design/resources/download/SF-Mono.dmg";
@@ -63,6 +63,7 @@ stdenvNoCC.mkDerivation {
   sourceRoot = ".";
 
   dontUnpack = true;
+  dontFixup = true;
 
   buildPhase = ''
     echo "Selected fonts are ${toString selectedFonts}"
