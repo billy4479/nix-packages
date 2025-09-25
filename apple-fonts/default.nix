@@ -9,11 +9,11 @@ let
   urlsAndShas = {
     sf-pro = {
       url = "https://devimages-cdn.apple.com/design/resources/download/SF-Pro.dmg";
-      sha256 = "sha256-8Dkh9ih3NUoKQXyGkmg44OMGUXK9gBnIsfbpGL8uNPc=";
+      sha256 = "sha256-Lk14U5iLc03BrzO5IdjUwORADqwxKSSg6rS3OlH9aa4=";
     };
     sf-compact = {
       url = "https://devimages-cdn.apple.com/design/resources/download/SF-Compact.dmg";
-      sha256 = "sha256-gKTztcBhUYR+VoV4cPED6ESu7slRzcQtLAQhBOY9CCk=";
+      sha256 = "sha256-CMNP+sL5nshwK0lGBERp+S3YinscCGTi1LVZVl+PuOM=";
     };
     sf-mono = {
       url = "https://devimages-cdn.apple.com/design/resources/download/SF-Mono.dmg";
