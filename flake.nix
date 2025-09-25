@@ -9,9 +9,9 @@
 
   outputs =
     {
-      self,
       nixpkgs,
       flake-utils,
+      ...
     }:
     flake-utils.lib.eachDefaultSystem (
       system:
@@ -20,7 +20,6 @@
           inherit system;
           config.allowUnfree = true;
         };
-        lib = pkgs.lib;
       in
       {
         formatter = pkgs.alejandra;
@@ -29,6 +28,7 @@
           packwiz-installer = pkgs.callPackage ./packwiz-installer { };
           apple-fonts = pkgs.callPackage ./apple-fonts { };
           google-sans = pkgs.callPackage ./google-sans { };
+          qimgv-qt6 = pkgs.callPackage ./qimgv-qt6 { };
         };
 
         devShell = pkgs.mkShell {
