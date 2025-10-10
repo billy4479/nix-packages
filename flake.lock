@@ -61,7 +61,31 @@
       "inputs": {
         "calendar-proxy": "calendar-proxy",
         "flake-utils": "flake-utils",
-        "nixpkgs": "nixpkgs"
+        "nixpkgs": "nixpkgs",
+        "server-tool": "server-tool"
+      }
+    },
+    "server-tool": {
+      "inputs": {
+        "flake-utils": [
+          "flake-utils"
+        ],
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1738607787,
+        "narHash": "sha256-jbuJBOfXYQQGmrfZ/CitDrni9tRRp8UZNAjijwz48GQ=",
+        "owner": "billy4479",
+        "repo": "server-tool",
+        "rev": "c980a1ac538a29721864469db0e01aad342aa8bf",
+        "type": "github"
+      },
+      "original": {
+        "owner": "billy4479",
+        "repo": "server-tool",
+        "type": "github"
       }
     },
     "systems": {

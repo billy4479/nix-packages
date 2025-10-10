@@ -12,6 +12,14 @@
         flake-utils.follows = "flake-utils";
       };
     };
+
+    server-tool = {
+      url = "github:billy4479/server-tool";
+      inputs = {
+        nixpkgs.follows = "nixpkgs";
+        flake-utils.follows = "flake-utils";
+      };
+    };
   };
 
   outputs =
@@ -34,6 +42,8 @@
           apple-fonts = pkgs.callPackage ./apple-fonts { };
           google-sans = pkgs.callPackage ./google-sans { };
           qimgv-qt6 = pkgs.callPackage ./qimgv-qt6 { };
+
+          server-tool = inputs.server-tool.packages.${system}.server-tool;
 
           containers = {
             calendar-proxy = inputs.calendar-proxy.packages.${system}.container;
