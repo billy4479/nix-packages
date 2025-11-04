@@ -10,11 +10,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1762245887,
-        "narHash": "sha256-ErZpYlqGmPvlxXCuq2wU4xj7iBUfkQ9b/vTDQtSgGeA=",
+        "lastModified": 1762246303,
+        "narHash": "sha256-EJLZUBADjSD1qGldnHddVQx9af40WuZJv1rX65cZMa0=",
         "owner": "billy4479",
         "repo": "calendar-proxy",
-        "rev": "072850c4d8e59cc8a5beae1c75e1008cdab26733",
+        "rev": "79647f7ee87b96c83c12bb32edf284686c846660",
         "type": "github"
       },
       "original": {
