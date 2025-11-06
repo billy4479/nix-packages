@@ -42,6 +42,7 @@
           apple-fonts = pkgs.callPackage ./apple-fonts { };
           google-sans = pkgs.callPackage ./google-sans { };
           qimgv-qt6 = pkgs.callPackage ./qimgv-qt6 { };
+          prefetch-all-images = pkgs.callPackage ./prefetch-all-images { };
 
           server-tool = inputs.server-tool.packages.${system}.server-tool;
 
