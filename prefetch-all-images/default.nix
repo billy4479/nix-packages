@@ -3,6 +3,7 @@
   makeWrapper,
   lib,
   nix-prefetch-docker,
+  nixfmt,
   ...
 }:
 stdenvNoCC.mkDerivation {
@@ -20,6 +21,7 @@ stdenvNoCC.mkDerivation {
       --prefix PATH : ${
         lib.makeBinPath [
           nix-prefetch-docker
+          nixfmt
         ]
       }
     '';

@@ -9,6 +9,7 @@ out="$1.nix"
 echo "# GENERATED FILE - DO NOT EDIT" >"$out"
 echo "{" >>"$out"
 
+sort "$1" |
 while IFS= read -r line; do
   i=$((i + 1))
   arr=(${line//:/ })
@@ -18,5 +19,7 @@ while IFS= read -r line; do
   nix-prefetch-docker --image-name "${arr[0]}" --image-tag "${arr[1]}" --arch amd64 --os linux --quiet >>$out
   echo ";" >>"$out"
   echo -e "\tDone."
-done <"$1"
+done
 echo "}" >>"$out"
+
+nixfmt "$out$
