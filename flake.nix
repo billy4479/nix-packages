@@ -20,6 +20,14 @@
         flake-utils.follows = "flake-utils";
       };
     };
+
+    mc-runner = {
+      url = "github:billy4479/mc-runner";
+      inputs = {
+        nixpkgs.follows = "nixpkgs";
+        flake-utils.follows = "flake-utils";
+      };
+    };
   };
 
   outputs =
@@ -46,7 +54,11 @@
 
           server-tool = inputs.server-tool.packages.${system}.server-tool;
 
+          mc-runner = inputs.mc-runner.packages.${system}.mc-runner;
+          mc-java = inputs.mc-runner.packages.${system}.java;
+
           containers = {
+            mc-runner = inputs.mc-runner.packages.${system}.docker-image;
             calendar-proxy = inputs.calendar-proxy.packages.${system}.container;
           };
         };

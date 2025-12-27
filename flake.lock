@@ -41,6 +41,29 @@
         "type": "github"
       }
     },
+    "mc-runner": {
+      "inputs": {
+        "flake-utils": [
+          "flake-utils"
+        ],
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1766846214,
+        "narHash": "sha256-5sun9UDNpUhUwjNneGGPYjdlLvBy5Z9/5eZ2PYz4b58=",
+        "owner": "billy4479",
+        "repo": "mc-runner",
+        "rev": "bd9f4eb5d7f388088e00ecf8a5f38e93c5fff31e",
+        "type": "github"
+      },
+      "original": {
+        "owner": "billy4479",
+        "repo": "mc-runner",
+        "type": "github"
+      }
+    },
     "nixpkgs": {
       "locked": {
         "lastModified": 1759977445,
@@ -61,6 +84,7 @@
       "inputs": {
         "calendar-proxy": "calendar-proxy",
         "flake-utils": "flake-utils",
+        "mc-runner": "mc-runner",
         "nixpkgs": "nixpkgs",
         "server-tool": "server-tool"
       }
