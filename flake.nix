@@ -54,13 +54,13 @@
           libvpl-tools = pkgs.callPackage ./libvpl-tools { };
 
           server-tool = inputs.server-tool.packages.${system}.server-tool;
+          calendar-proxy = inputs.calendar-proxy.packages.${system}.default;
 
           mc-runner = inputs.mc-runner.packages.${system}.mc-runner;
           mc-java = inputs.mc-runner.packages.${system}.java;
 
           containers = {
             mc-runner = inputs.mc-runner.packages.${system}.docker-image;
-            calendar-proxy = inputs.calendar-proxy.packages.${system}.container;
           };
         };
 
