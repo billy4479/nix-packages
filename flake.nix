@@ -57,7 +57,7 @@
           calendar-proxy = inputs.calendar-proxy.packages.${system}.default;
 
           mc-runner = inputs.mc-runner.packages.${system}.mc-runner;
-          mc-java = inputs.mc-runner.packages.${system}.java;
+          mc-java = inputs.mc-runner.packages.${system}.mc-java;
 
           containers = {
             mc-runner = inputs.mc-runner.packages.${system}.docker-image;
