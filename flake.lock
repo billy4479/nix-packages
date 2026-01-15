@@ -51,11 +51,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1767727114,
-        "narHash": "sha256-u3Ag8K4VUVZaEI7RvW7rqAi9Z0Vt92/cnW5iL79PKIc=",
+        "lastModified": 1768499596,
+        "narHash": "sha256-0IYpAEWJcipqonFeBbUUOajvIZHP/wiwDOVyOPCPy2I=",
         "owner": "billy4479",
         "repo": "mc-runner",
-        "rev": "09669e55f86016db56120d101253d3a4ede61734",
+        "rev": "caad8724a7e38efa7ab53c472eca0f902896a3bf",
         "type": "github"
       },
       "original": {
