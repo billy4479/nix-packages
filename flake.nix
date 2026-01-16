@@ -46,7 +46,6 @@
       in
       {
         packages = {
-          packwiz-installer = pkgs.callPackage ./packwiz-installer { };
           apple-fonts = pkgs.callPackage ./apple-fonts { };
           google-sans = pkgs.callPackage ./google-sans { };
           qimgv-qt6 = pkgs.callPackage ./qimgv-qt6 { };
@@ -58,13 +57,9 @@
 
           mc-runner = inputs.mc-runner.packages.${system}.mc-runner;
           mc-java = inputs.mc-runner.packages.${system}.mc-java;
-
-          containers = {
-            mc-runner = inputs.mc-runner.packages.${system}.docker-image;
-          };
         };
 
-        devShell = pkgs.mkShell {
+        devShell.${system}.default = pkgs.mkShell {
           packages = with pkgs; [ nixd ];
         };
       }
