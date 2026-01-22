@@ -57,9 +57,10 @@
 
           mc-runner = inputs.mc-runner.packages.${system}.mc-runner;
           mc-java = inputs.mc-runner.packages.${system}.mc-java;
+
         };
 
-        devShell.${system}.default = pkgs.mkShell {
+        devShell = pkgs.mkShell {
           packages = with pkgs; [ nixd ];
         };
       }
