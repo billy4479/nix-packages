@@ -45,20 +45,24 @@
         };
       in
       {
-        packages = {
-          apple-fonts = pkgs.callPackage ./apple-fonts { };
-          google-sans = pkgs.callPackage ./google-sans { };
-          qimgv-qt6 = pkgs.callPackage ./qimgv-qt6 { };
-          prefetch-all-images = pkgs.callPackage ./prefetch-all-images { };
-          libvpl-tools = pkgs.callPackage ./libvpl-tools { };
+        packages =
+          let
+            inherit (pkgs) callPackage;
+          in
+          {
+            apple-fonts = callPackage ./apple-fonts { };
+            google-sans = callPackage ./google-sans { };
+            qimgv-qt6 = callPackage ./qimgv-qt6 { };
+            prefetch-all-images = callPackage ./prefetch-all-images { };
+            libvpl-tools = callPackage ./libvpl-tools { };
+            mc-router = callPackage ./mc-router { };
 
-          server-tool = inputs.server-tool.packages.${system}.server-tool;
-          calendar-proxy = inputs.calendar-proxy.packages.${system}.default;
+            server-tool = inputs.server-tool.packages.${system}.server-tool;
+            calendar-proxy = inputs.calendar-proxy.packages.${system}.default;
 
-          mc-runner = inputs.mc-runner.packages.${system}.mc-runner;
-          mc-java = inputs.mc-runner.packages.${system}.mc-java;
-
-        };
+            mc-runner = inputs.mc-runner.packages.${system}.mc-runner;
+            mc-java = inputs.mc-runner.packages.${system}.mc-java;
+          };
 
         devShell = pkgs.mkShell {
           packages = with pkgs; [ nixd ];
