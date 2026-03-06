@@ -28,6 +28,14 @@
         flake-utils.follows = "flake-utils";
       };
     };
+
+    ff = {
+      url = "git+ssh://git@github.com/billy4479/ff.git?ref=master&shallow=1";
+      inputs = {
+        nixpkgs.follows = "nixpkgs";
+        flake-utils.follows = "flake-utils";
+      };
+    };
   };
 
   outputs =
@@ -62,6 +70,8 @@
 
             mc-runner = inputs.mc-runner.packages.${system}.mc-runner;
             mc-java = inputs.mc-runner.packages.${system}.mc-java;
+
+            ff = inputs.ff.packages.${system}.default;
           };
 
         devShell = pkgs.mkShell {

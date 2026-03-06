@@ -23,6 +23,31 @@
         "type": "github"
       }
     },
+    "ff": {
+      "inputs": {
+        "flake-utils": [
+          "flake-utils"
+        ],
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1772793594,
+        "narHash": "sha256-ATQ7/p8nFvbCpqdPIjesDSbtboV7xIe8O+peM3GiQxI=",
+        "ref": "master",
+        "rev": "3fa046ff0d423ac9af2b7a89678070535e9f238f",
+        "shallow": true,
+        "type": "git",
+        "url": "ssh://git@github.com/billy4479/ff.git"
+      },
+      "original": {
+        "ref": "master",
+        "shallow": true,
+        "type": "git",
+        "url": "ssh://git@github.com/billy4479/ff.git"
+      }
+    },
     "flake-utils": {
       "inputs": {
         "systems": "systems"
@@ -83,6 +108,7 @@
     "root": {
       "inputs": {
         "calendar-proxy": "calendar-proxy",
+        "ff": "ff",
         "flake-utils": "flake-utils",
         "mc-runner": "mc-runner",
         "nixpkgs": "nixpkgs",
