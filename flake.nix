@@ -28,7 +28,6 @@
           {
             apple-fonts = callPackage ./apple-fonts { };
             google-sans = callPackage ./google-sans { };
-            qimgv-qt6 = callPackage ./qimgv-qt6 { };
             prefetch-all-images = callPackage ./prefetch-all-images { };
             libvpl-tools = callPackage ./libvpl-tools { };
             mc-router = callPackage ./mc-router { };
