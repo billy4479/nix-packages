@@ -19,18 +19,23 @@
           inherit system;
           config.allowUnfree = true;
         };
-
-        pkgsNames = [
-          "apple-fonts"
-          "google-sans"
-          "prefetch-all-images"
-          "libvpl-tools"
-          "mc-router"
-          "caveclient"
-        ];
       in
       {
-        packages = (builtins.foldl' (p: n: p // { "${n}" = pkgs.callPackage ./${n} { }; }) { } pkgsNames);
+        packages =
+          let
+            inherit (pkgs) callPackage;
+          in
+          rec {
+            apple-fonts = callPackage ./apple-fonts { };
+            google-sans = callPackage ./google-sans { };
+            prefetch-all-images = callPackage ./prefetch-all-images { };
+            libvpl-tools = callPackage ./libvpl-tools { };
+            mc-router = callPackage ./mc-router { };
+
+            caveclient = callPackage ./caveclient { };
+            standard_transform = callPackage ./standard_transform { };
+            microns-datacleaner = callPackage ./microns-datacleaner { inherit caveclient standard_transform; };
+          };
 
         devShells.default = pkgs.mkShell {
           packages = with pkgs; [ nixd ];
