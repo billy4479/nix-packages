@@ -7,15 +7,15 @@
   ...
 }:
 python3Packages.buildPythonPackage (finalAttrs: {
-  pname = "caveclient";
-  version = "8.0.1";
+  pname = "microns-datacleaner";
+  version = "0.2.1.4";
   pyproject = true;
 
   src = fetchFromGitHub {
     owner = "MICrONS-Milano-CoLab";
     repo = "MICrONS-datacleaner";
-    rev = "d1be915073200a4c644be02c66c89ecb81df782b";
-    hash = "sha256-ZEUjTjlxTlUp8D07gvqZvoNtmEpsgKUTWlWRWD59J14=";
+    rev = "b2d83643f6961c021b50390a81879927a8f9720a";
+    hash = "sha256-a5LG+3yHzOXQPW/+qtEKu6lQiZonRWbEKptL0tl4+/k=";
   };
 
   build-system = with python3Packages; [
@@ -30,5 +30,6 @@ python3Packages.buildPythonPackage (finalAttrs: {
     tqdm
     scipy
     h5py
+    pyyaml
   ];
 })
