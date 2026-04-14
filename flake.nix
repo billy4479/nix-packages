@@ -31,6 +31,7 @@
             prefetch-all-images = callPackage ./prefetch-all-images { };
             libvpl-tools = callPackage ./libvpl-tools { };
             mc-router = callPackage ./mc-router { };
+            lunamultiplayer-server = callPackage ./lunamultiplayer-server { };
 
             caveclient = callPackage ./caveclient { };
             standard_transform = callPackage ./standard_transform { };
