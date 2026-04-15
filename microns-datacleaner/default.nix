@@ -8,7 +8,7 @@
 }:
 python3Packages.buildPythonPackage (finalAttrs: {
   pname = "microns-datacleaner";
-  version = "0.2.1.4";
+  version = "0.2.1.5";
   pyproject = true;
 
   src = fetchFromGitHub {
