@@ -29,6 +29,7 @@
             apple-fonts = callPackage ./apple-fonts { };
             google-sans = callPackage ./google-sans { };
             prefetch-all-images = callPackage ./prefetch-all-images { };
+            byparr = callPackage ./byparr { };
             libvpl-tools = callPackage ./libvpl-tools { };
             mc-router = callPackage ./mc-router { };
             lunamultiplayer-server = callPackage ./lunamultiplayer-server { };
