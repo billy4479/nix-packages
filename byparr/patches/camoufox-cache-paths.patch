@@ -1,0 +1,36 @@
+diff --git a/camoufox/locale.py b/camoufox/locale.py
+index 6f3fb5a..cb8b6c3 100644
+--- a/camoufox/locale.py
++++ b/camoufox/locale.py
+@@ -1,5 +1,7 @@
++import os
+ import xml.etree.ElementTree as ET  # nosec
+ from dataclasses import dataclass
++from pathlib import Path
+ from typing import Any, Dict, Iterable, List, Optional, Set, Tuple, Union, cast
+ 
+ import numpy as np
+@@ -189,7 +191,9 @@ Helpers to fetch geolocation, timezone, and locale data given an IP.
+ """
+ 
+ 
+-MMDB_FILE = LOCAL_DATA / 'GeoLite2-City.mmdb'
++MMDB_FILE = Path(
++    os.environ.get('CAMOUFOX_GEOLITE2_CITY', LOCAL_DATA / 'GeoLite2-City.mmdb')
++)
+ MMDB_REPO = "P3TERX/GeoLite.mmdb"
+ 
+ 
+diff --git a/camoufox/pkgman.py b/camoufox/pkgman.py
+index 964218d..5977754 100644
+--- a/camoufox/pkgman.py
++++ b/camoufox/pkgman.py
+@@ -51,7 +51,7 @@ if sys.platform not in OS_MAP:
+ OS_NAME: Literal['mac', 'win', 'lin'] = OS_MAP[sys.platform]
+ 
+ 
+-INSTALL_DIR: Path = Path(user_cache_dir("camoufox"))
++INSTALL_DIR: Path = Path(os.environ.get("CAMOUFOX_CACHE_DIR", user_cache_dir("camoufox")))
+ LOCAL_DATA: Path = Path(os.path.abspath(__file__)).parent
+ 
+ # The supported architectures for each OS
