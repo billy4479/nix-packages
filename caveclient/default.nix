@@ -5,12 +5,12 @@
 }:
 python3Packages.buildPythonPackage (finalAttrs: {
   pname = "caveclient";
-  version = "8.0.1";
+  version = "8.1.0";
   pyproject = true;
 
   src = fetchPypi {
     inherit (finalAttrs) pname version;
-    hash = "sha256-zKjKMgneWZJI6jhvQxVl+0GS2IuEgRpogNEx0r1sAYE=";
+    hash = "sha256-t3mtzooUqLbKPY51ElTPw1jzHxPtvfs3NT8qx3oCYsI=";
   };
 
   build-system = with python3Packages; [
