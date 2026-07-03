@@ -59,6 +59,7 @@
             libvpl-tools = callPackage ./libvpl-tools { };
             mc-router = callPackage ./mc-router { };
             lunamultiplayer-server = callPackage ./lunamultiplayer-server { };
+            mcp-searxng = callPackage ./mcp-searxng { };
 
             caveclient = callPackage ./caveclient { };
             standard_transform = callPackage ./standard_transform { };
