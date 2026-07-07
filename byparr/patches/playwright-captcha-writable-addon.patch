@@ -1,10 +1,9 @@
 diff --git a/playwright_captcha/utils/camoufox_add_init_script/add_init_script.py b/playwright_captcha/utils/camoufox_add_init_script/add_init_script.py
-index 56b4d7b..db18af1 100644
 --- a/playwright_captcha/utils/camoufox_add_init_script/add_init_script.py
 +++ b/playwright_captcha/utils/camoufox_add_init_script/add_init_script.py
-@@ -9,11 +9,18 @@ import aiofiles
- def get_addon_path():
-     """Get the absolute path to the addon's directory"""
+@@ -13,9 +13,16 @@ def get_addon_path() -> str:
+     :return: Absolute path to the addon's directory
+     """
  
 -    current_dir = Path(__file__).parent
 -
@@ -21,4 +20,3 @@ index 56b4d7b..db18af1 100644
 +        os.chmod(addon_path, 0o700)
  
      return str(addon_path.resolve())
- 

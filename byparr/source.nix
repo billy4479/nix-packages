@@ -5,8 +5,8 @@ let
     type = "github";
     owner = "ThePhaseless";
     repo = "Byparr";
-    rev = "ceef2d66bfd24d8014a5392d5622671584fa9162";
-    narHash = "sha256-6XlhQJI/TBYXbojivBp+dFXJDcuBsY6ZLwLwTw+YqMA=";
+    rev = "ecdd4c112a60c5fb22c781f142537e0b3399e568";
+    narHash = "sha256-eIbWqbUNOcS0WVgszXPVIbDx0hhRH1d1o+K0JXAEdwY=";
   };
 in
 stdenvNoCC.mkDerivation {

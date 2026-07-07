@@ -100,6 +100,11 @@ stdenvNoCC.mkDerivation {
     mkdir -p "$out/bin" "$out/app" "$out/share/byparr"
     cp -R "${source.sourcePath}/." "$out/app"
     rm -f "$out/app/test.sh"
+    substituteInPlace "$out/app/src/utils.py" \
+      --replace-fail "import logging" "import logging
+import os" \
+      --replace-fail 'locale="auto",' 'locale="auto",
+        binary_path=os.environ.get("BYPARR_BROWSER_BINARY"),'
 
     cp -R "${camoufox}/." "$out/share/byparr/camoufox"
     if [ -e "$out/share/byparr/camoufox/camoufox-bin" ]; then
@@ -113,6 +118,7 @@ stdenvNoCC.mkDerivation {
       --chdir "$out/app" \
       --set CAMOUFOX_CACHE_DIR "$out/share/byparr/camoufox" \
       --set CAMOUFOX_GEOLITE2_CITY "${camoufox.geolite}" \
+      --set BYPARR_BROWSER_BINARY "$out/share/byparr/camoufox/camoufox-bin" \
       --set-default HOME /tmp/byparr-home \
       --set-default XDG_CACHE_HOME /tmp/byparr-cache \
       --set PYTHONUNBUFFERED 1 \

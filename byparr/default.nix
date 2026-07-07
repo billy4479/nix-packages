@@ -7,7 +7,7 @@
 }:
 
 let
-  version = "2.1.0";
+  version = "2.1.0-unstable-2026-07-04";
   source = callPackage ./source.nix { inherit version; };
   pythonEnv = callPackage ./python-env.nix {
     inherit

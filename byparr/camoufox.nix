@@ -6,23 +6,23 @@
 
 let
   camoufoxBrowser = fetchurl {
-    url = "https://github.com/daijro/camoufox/releases/download/v135.0.1-beta.24/camoufox-135.0.1-beta.24-lin.x86_64.zip";
-    hash = "sha256-YeHsRV4CFyCvOKXMX/dWYSE2PLW4K3LyTjgbomdqSIg=";
+    url = "https://github.com/daijro/camoufox/releases/download/v150.0.2-beta.25/camoufox-150.0.2-alpha.26-lin.x86_64.zip";
+    hash = "sha256-sUa5iwwsQQI3Fv7vNkUfMZpTQwn3LFRYSksLiGcPUQs=";
   };
 
   geolite = fetchurl {
-    url = "https://github.com/P3TERX/GeoLite.mmdb/releases/download/2026.06.19/GeoLite2-City.mmdb";
-    hash = "sha256-w0k6GVVsV0PSXBfuPNS9LXZoQe18fWJC/rHKro9inPs=";
+    url = "https://github.com/P3TERX/GeoLite.mmdb/releases/download/2026.07.07/GeoLite2-City.mmdb";
+    hash = "sha256-SYnbhFfzWAWn43S7TDX5pE3x0/CpazKOk23sriYMMNM=";
   };
 
   ublockOrigin = fetchurl {
-    url = "https://addons.mozilla.org/firefox/downloads/file/4560539/ublock_origin-1.71.0.xpi";
-    hash = "sha256-efpsNBoQFf8xzi2JjTRF2ovJoYIFI9Av4GP2OCtYPhU=";
+    url = "https://addons.mozilla.org/firefox/downloads/file/4872816/ublock_origin-1.72.0.xpi";
+    hash = "sha256-ec1CarWZgBxZ3+mJXLS4AC+vPaBZ9xEcJyGsEBaKO2Q=";
   };
 in
 stdenvNoCC.mkDerivation {
   pname = "byparr-camoufox";
-  version = "135.0.1-beta.24";
+  version = "150.0.2-alpha.26";
 
   inherit geolite ublockOrigin;
 
@@ -42,7 +42,7 @@ stdenvNoCC.mkDerivation {
     cp -R . "$out"
     mkdir -p "$out/addons/UBO"
     unzip -q "${ublockOrigin}" -d "$out/addons/UBO"
-    printf '{"version":"135.0.1","release":"beta.24"}' > "$out/version.json"
+    printf '{"version":"150.0.2","release":"alpha.26"}' > "$out/version.json"
     chmod -R u+rwX,go+rX "$out"
     runHook postInstall
   '';

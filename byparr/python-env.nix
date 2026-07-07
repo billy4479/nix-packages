@@ -32,13 +32,6 @@ let
               };
             });
 
-            camoufox = (prev.camoufox.override { sourcePreference = "sdist"; }).overrideAttrs (old: {
-              patches = (old.patches or [ ]) ++ [ ./patches/camoufox-cache-paths.patch ];
-              nativeBuildInputs = (old.nativeBuildInputs or [ ]) ++ final.resolveBuildSystem {
-                poetry-core = [ ];
-              };
-            });
-
             "playwright-captcha" =
               (prev."playwright-captcha".override { sourcePreference = "sdist"; }).overrideAttrs (old: {
                 prePatch = (old.prePatch or "") + ''
@@ -53,13 +46,34 @@ let
                   setuptools = [ ];
                 };
               });
+
+            invisible-playwright = prev.invisible-playwright.overrideAttrs (old: {
+              nativeBuildInputs = (old.nativeBuildInputs or [ ]) ++ final.resolveBuildSystem {
+                hatchling = [ ];
+              };
+            });
+
+            invisible-core = prev.invisible-core.overrideAttrs (old: {
+              nativeBuildInputs = (old.nativeBuildInputs or [ ]) ++ final.resolveBuildSystem {
+                hatchling = [ ];
+              };
+            });
+
+            invisible-useragent = prev.invisible-useragent.overrideAttrs (old: {
+              nativeBuildInputs = (old.nativeBuildInputs or [ ]) ++ final.resolveBuildSystem {
+                hatchling = [ ];
+                setuptools = [ ];
+              };
+            });
           })
         ]
       );
 in
 pythonSet.mkVirtualEnv "byparr-python-env-${version}" {
-  camoufox = [ "geoip" ];
   fastapi = [ "standard" ];
+  invisible-playwright = [ ];
+  playwright = [ ];
   "playwright-captcha" = [ ];
   pydantic = [ ];
+  pydantic-settings = [ ];
 }
