@@ -26,13 +26,13 @@
 
 stdenv.mkDerivation {
   pname = "libvpl-tools";
-  version = "1.5.0";
+  version = "1.6.0";
 
   src = fetchFromGitHub {
     owner = "intel";
     repo = "libvpl-tools";
-    rev = "ad9deecaf0ee76f689373b55fe620c843e3c8a4d";
-    sha256 = "sha256-s0ogz9Bkq0RRJ72vChqoA2NpEf3X+Hpn24aXO+2WI7U=";
+    rev = "3de25bf3358de6d68633aeb915a2564808197315";
+    sha256 = "sha256-0nE3cAUzdArf1QOsbFhBowaTqTVkNk4ZhJKJz311H6s=";
   };
 
   nativeBuildInputs = [
