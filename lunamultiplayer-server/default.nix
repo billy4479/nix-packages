@@ -41,6 +41,10 @@ buildDotnetModule {
       Server/Server.csproj \
       ServerTest/ServerTest.csproj \
       --replace-fail "<TargetFramework>net6.0</TargetFramework>" "<TargetFramework>net10.0</TargetFramework>"
+    substituteInPlace Server/Utilities/DotNetRuntimeChecker.cs \
+      --replace-fail "private const int RequiredMajorVersion = 6;" "private const int RequiredMajorVersion = 10;" \
+      --replace-fail 'private const string RequiredRuntimeName = ".NET 6.0 Runtime";' 'private const string RequiredRuntimeName = ".NET 10.0 Runtime";' \
+      --replace-fail 'private const string RuntimeDownloadUrl = "https://dotnet.microsoft.com/en-us/download/dotnet/6.0";' 'private const string RuntimeDownloadUrl = "https://dotnet.microsoft.com/en-us/download/dotnet/10.0";'
   '';
 
   nugetDeps = ./deps.json;
