@@ -60,6 +60,7 @@
             mc-router = callPackage ./mc-router { };
             lunamultiplayer-server = callPackage ./lunamultiplayer-server { };
             mcp-searxng = callPackage ./mcp-searxng { };
+            openchamber = callPackage ./openchamber { };
 
             caveclient = callPackage ./caveclient { };
             standard_transform = callPackage ./standard_transform { };
