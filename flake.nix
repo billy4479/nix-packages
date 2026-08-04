@@ -61,6 +61,7 @@
             lunamultiplayer-server = callPackage ./lunamultiplayer-server { };
             mcp-searxng = callPackage ./mcp-searxng { };
             openchamber = callPackage ./openchamber { };
+            openchamber-web = callPackage ./openchamber-web { };
 
             caveclient = callPackage ./caveclient { };
             standard_transform = callPackage ./standard_transform { };
