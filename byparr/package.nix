@@ -103,7 +103,7 @@ stdenvNoCC.mkDerivation {
     substituteInPlace "$out/app/src/utils.py" \
       --replace-fail "import logging" "import logging
 import os" \
-      --replace-fail 'locale="auto",' 'locale="auto",
+      --replace-fail 'locale="auto",' 'locale="en-US",
         binary_path=os.environ.get("BYPARR_BROWSER_BINARY"),'
 
     cp -R "${camoufox}/." "$out/share/byparr/camoufox"

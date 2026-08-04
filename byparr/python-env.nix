@@ -11,8 +11,32 @@
 }:
 
 let
+  upstreamLock = builtins.fromTOML (builtins.readFile "${source.sourcePath}/uv.lock");
+  # The locked feder-cr repositories were deleted. The surviving fork retains
+  # the complete implementation from before invisible-core was split out.
+  invisibleCore = builtins.head (
+    builtins.filter (package: package.name == "invisible-core") upstreamLock.package
+  );
+  uvLock = upstreamLock // {
+    package = map (
+      package:
+      if package.name == "invisible-playwright" then
+        package
+        // {
+          version = "0.2.0";
+          source.git = "https://github.com/v8eta/invisible_playwright.git#29262a644eae368f544b005782ce7c54701796c2";
+          dependencies =
+            builtins.filter (dependency: dependency.name != "invisible-core") package.dependencies
+            ++ invisibleCore.dependencies;
+        }
+      else
+        package
+    ) (builtins.filter (package: package.name != "invisible-core") upstreamLock.package);
+  };
+
   workspace = uv2nix.lib.workspace.loadWorkspace {
     workspaceRoot = source.sourcePath;
+    inherit uvLock;
   };
 
   pythonSet =
