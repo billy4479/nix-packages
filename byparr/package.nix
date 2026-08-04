@@ -40,6 +40,7 @@
   stdenvNoCC,
   udev,
   version,
+  xorg-server,
   zlib,
   ...
 }:
@@ -123,6 +124,7 @@ import os" \
       --set-default XDG_CACHE_HOME /tmp/byparr-cache \
       --set PYTHONUNBUFFERED 1 \
       --set PYTHONDONTWRITEBYTECODE 1 \
+      --prefix PATH : "${lib.makeBinPath [ xorg-server ]}" \
       --prefix LD_LIBRARY_PATH : "$out/share/byparr/camoufox:${runtimeLibraryPath}" \
       --add-flags main.py
 
