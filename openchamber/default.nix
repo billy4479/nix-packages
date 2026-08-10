@@ -1,8 +1,8 @@
 {
   bun,
+  callPackage,
   copyDesktopItems,
   electron_41,
-  fetchFromGitHub,
   lib,
   makeDesktopItem,
   makeWrapper,
@@ -15,6 +15,7 @@
 }:
 
 let
+  common = callPackage ./common.nix { };
   electron = electron_41;
   electronBuilderArch =
     {
@@ -26,14 +27,7 @@ let
 in
 stdenv.mkDerivation (finalAttrs: {
   pname = "openchamber";
-  version = "1.17.2";
-
-  src = fetchFromGitHub {
-    owner = "openchamber";
-    repo = "openchamber";
-    tag = "v${finalAttrs.version}";
-    hash = "sha256-5RascQNN4C0hxuGHPtWkcxsjIlxRajJ3yt5RIKgWIks=";
-  };
+  inherit (common) version src;
 
   postPatch = ''
     substituteInPlace packages/electron/main.mjs \
@@ -51,53 +45,18 @@ stdenv.mkDerivation (finalAttrs: {
         "path.join(resourceRoot(), 'icons', iconFileName)"
   '';
 
-  nodeModules = stdenv.mkDerivation {
-    pname = "${finalAttrs.pname}-node-modules";
-    inherit (finalAttrs) version src;
-
-    impureEnvVars = lib.fetchers.proxyImpureEnvVars ++ [
-      "GIT_PROXY_COMMAND"
-      "SOCKS_SERVER"
+  nodeModules = common.mkBunModules {
+    pname = finalAttrs.pname;
+    nativeBuildInputs = [ nodejs ];
+    installFlags = [
+      "--frozen-lockfile"
+      "--ignore-scripts"
+      "--no-progress"
     ];
-
-    nativeBuildInputs = [
-      bun
-      nodejs
-      writableTmpDirAsHomeHook
-    ];
-
-    env.ELECTRON_SKIP_BINARY_DOWNLOAD = "1";
-
-    dontConfigure = true;
-    dontFixup = true;
-
-    buildPhase = ''
-      runHook preBuild
-
-      export BUN_INSTALL_CACHE_DIR=$(mktemp -d)
-      bun install --frozen-lockfile --ignore-scripts --no-progress
-
-      runHook postBuild
-    '';
-
-    installPhase = ''
-      runHook preInstall
-
-      mkdir -p $out
-      cp -R node_modules $out/node_modules
-      for modules in packages/*/node_modules; do
-        package=$(basename "$(dirname "$modules")")
-        mkdir -p "$out/packages/$package"
-        cp -R "$modules" "$out/packages/$package"
-      done
-
-      runHook postInstall
-    '';
-
-    outputHashMode = "recursive";
-    outputHash =
+    copyWorkspaceModules = true;
+    hash =
       {
-        x86_64-linux = "sha256-6apD95LLFsYDBV4bq6+dnreoi7e6wPnBIopwDE4/rn8=";
+        x86_64-linux = "sha256-RJoVUH7x0wfSHUWjecNirvdBnjuTZNL1b5gdcrOJyOM=";
       }
       .${stdenv.hostPlatform.system} or (throw "Unsupported system: ${stdenv.hostPlatform.system}");
   };
@@ -117,15 +76,10 @@ stdenv.mkDerivation (finalAttrs: {
   configurePhase = ''
     runHook preConfigure
 
-    cp -R ${finalAttrs.nodeModules}/node_modules .
-    for modules in ${finalAttrs.nodeModules}/packages/*/node_modules; do
-      package=$(basename "$(dirname "$modules")")
-      cp -R "$modules" "packages/$package"
-    done
-    chmod -R u+w node_modules
-    patchShebangs node_modules
-    node fix-deprecation.js
-    node_modules/.bin/patch-package
+    ${common.configureNodeModules {
+      nodeModules = finalAttrs.nodeModules;
+      copyWorkspaceModules = true;
+    }}
 
     runHook postConfigure
   '';
@@ -134,6 +88,7 @@ stdenv.mkDerivation (finalAttrs: {
     runHook preBuild
 
     bun run --cwd packages/web build
+    ${common.installKatexFonts}
     cp -R packages/web/dist packages/electron/resources/web-dist
     bun packages/electron/scripts/bundle-main.mjs
 
@@ -149,7 +104,6 @@ stdenv.mkDerivation (finalAttrs: {
       ${node-gyp}/lib/node_modules/node-gyp/bin/node-gyp.js
     )
     "''${nodeGyp[@]}" rebuild --directory=node_modules/node-pty "''${nodeGypFlags[@]}"
-    "''${nodeGyp[@]}" rebuild --release --directory=packages/electron/node_modules/better-sqlite3 "''${nodeGypFlags[@]}"
 
     cp -R ${electron.dist} electron-dist
     chmod -R u+w electron-dist

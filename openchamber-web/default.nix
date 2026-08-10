@@ -1,6 +1,6 @@
 {
   bun,
-  fetchFromGitHub,
+  callPackage,
   lib,
   makeWrapper,
   node-gyp,
@@ -11,106 +11,42 @@
   writableTmpDirAsHomeHook,
 }:
 
+let
+  common = callPackage ../openchamber/common.nix { };
+in
 stdenv.mkDerivation (finalAttrs: {
   pname = "openchamber-web";
-  version = "1.17.2";
+  inherit (common) version src;
 
-  src = fetchFromGitHub {
-    owner = "openchamber";
-    repo = "openchamber";
-    tag = "v${finalAttrs.version}";
-    hash = "sha256-5RascQNN4C0hxuGHPtWkcxsjIlxRajJ3yt5RIKgWIks=";
+  buildNodeModules = common.mkBunModules {
+    pname = "${finalAttrs.pname}-build";
+    installFlags = [
+      "--filter"
+      "openchamber-monorepo"
+      "--filter"
+      "@openchamber/ui"
+      "--filter"
+      "@openchamber/web"
+      "--frozen-lockfile"
+      "--ignore-scripts"
+      "--linker=hoisted"
+      "--no-progress"
+    ];
+    hash = "sha256-H3WWYgSI9g1Z6sT3sLIZCcYqkqE7FL1vCf7tJm1u7zQ=";
   };
 
-  buildNodeModules = stdenv.mkDerivation {
-    pname = "${finalAttrs.pname}-build-node-modules";
-    inherit (finalAttrs) version src;
-
-    impureEnvVars = lib.fetchers.proxyImpureEnvVars ++ [
-      "GIT_PROXY_COMMAND"
-      "SOCKS_SERVER"
+  runtimeNodeModules = common.mkBunModules {
+    pname = "${finalAttrs.pname}-runtime";
+    installFlags = [
+      "--filter"
+      "@openchamber/web"
+      "--frozen-lockfile"
+      "--ignore-scripts"
+      "--linker=hoisted"
+      "--no-progress"
+      "--production"
     ];
-
-    nativeBuildInputs = [
-      bun
-      writableTmpDirAsHomeHook
-    ];
-
-    dontConfigure = true;
-    dontFixup = true;
-
-    buildPhase = ''
-      runHook preBuild
-
-      export BUN_INSTALL_CACHE_DIR=$(mktemp -d)
-      bun install \
-        --filter openchamber-monorepo \
-        --filter @openchamber/ui \
-        --filter @openchamber/web \
-        --frozen-lockfile \
-        --ignore-scripts \
-        --linker=hoisted \
-        --no-progress
-
-      runHook postBuild
-    '';
-
-    installPhase = ''
-      runHook preInstall
-
-      mkdir -p $out
-      cp -R node_modules $out/node_modules
-
-      runHook postInstall
-    '';
-
-    outputHashMode = "recursive";
-    outputHash = "sha256-VCKLfAHGEWcEerp1ttESIBH1JqKy2VAZAUS5k22PA5o=";
-  };
-
-  runtimeNodeModules = stdenv.mkDerivation {
-    pname = "${finalAttrs.pname}-runtime-node-modules";
-    inherit (finalAttrs) version src;
-
-    impureEnvVars = lib.fetchers.proxyImpureEnvVars ++ [
-      "GIT_PROXY_COMMAND"
-      "SOCKS_SERVER"
-    ];
-
-    nativeBuildInputs = [
-      bun
-      writableTmpDirAsHomeHook
-    ];
-
-    dontConfigure = true;
-    dontFixup = true;
-
-    buildPhase = ''
-      runHook preBuild
-
-      export BUN_INSTALL_CACHE_DIR=$(mktemp -d)
-      bun install \
-        --filter @openchamber/web \
-        --frozen-lockfile \
-        --ignore-scripts \
-        --linker=hoisted \
-        --no-progress \
-        --production
-
-      runHook postBuild
-    '';
-
-    installPhase = ''
-      runHook preInstall
-
-      mkdir -p $out
-      cp -R node_modules $out/node_modules
-
-      runHook postInstall
-    '';
-
-    outputHashMode = "recursive";
-    outputHash = "sha256-6lc1fujqV1z4OygVeCxJPAs+6GDQzRTF63tGBgZYmzg=";
+    hash = "sha256-3XRGQDD60MwtoEL7rwOnMeQcGeig+1EeHaQv7piSUzU=";
   };
 
   nativeBuildInputs = [
@@ -125,11 +61,7 @@ stdenv.mkDerivation (finalAttrs: {
   configurePhase = ''
     runHook preConfigure
 
-    cp -R ${finalAttrs.buildNodeModules}/node_modules .
-    chmod -R u+w node_modules
-    patchShebangs node_modules
-    node fix-deprecation.js
-    node_modules/.bin/patch-package
+    ${common.configureNodeModules { nodeModules = finalAttrs.buildNodeModules; }}
 
     runHook postConfigure
   '';
@@ -138,6 +70,7 @@ stdenv.mkDerivation (finalAttrs: {
     runHook preBuild
 
     bun run --cwd packages/web build
+    ${common.installKatexFonts}
 
     rm -rf node_modules
     cp -R ${finalAttrs.runtimeNodeModules}/node_modules .
@@ -156,7 +89,6 @@ stdenv.mkDerivation (finalAttrs: {
       --jobs="''${NIX_BUILD_CORES:-1}"
     )
     "''${nodeGyp[@]}" rebuild --directory=node_modules/node-pty "''${nodeGypFlags[@]}"
-    "''${nodeGyp[@]}" rebuild --release --directory=node_modules/better-sqlite3 "''${nodeGypFlags[@]}"
 
     runHook postBuild
   '';
