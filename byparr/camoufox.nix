@@ -11,8 +11,8 @@ let
   };
 
   geolite = fetchurl {
-    url = "https://github.com/P3TERX/GeoLite.mmdb/releases/download/2026.08.04/GeoLite2-City.mmdb";
-    hash = "sha256-bmaEyrBOu6EMHqn0pEMXXKD/CA4lXoT57wNQUXWCZX4=";
+    url = "https://github.com/P3TERX/GeoLite.mmdb/releases/download/2026.08.16/GeoLite2-City.mmdb";
+    hash = "sha256-Zz+0M/+j210XWuI134RtMq5ruUZ33npiXOUavKSJHag=";
   };
 
   ublockOrigin = fetchurl {
