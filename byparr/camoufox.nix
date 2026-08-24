@@ -1,5 +1,6 @@
 {
   fetchurl,
+  gzip,
   stdenvNoCC,
   unzip,
 }:
@@ -11,8 +12,13 @@ let
   };
 
   geolite = fetchurl {
-    url = "https://github.com/P3TERX/GeoLite.mmdb/releases/download/2026.08.16/GeoLite2-City.mmdb";
-    hash = "sha256-Zz+0M/+j210XWuI134RtMq5ruUZ33npiXOUavKSJHag=";
+    name = "GeoLite2-City.mmdb";
+    url = "https://raw.githubusercontent.com/wp-statistics/GeoLite2-City/cc55138696d71641d09b32c9cd426c2e4dfde089/GeoLite2-City.mmdb.gz";
+    hash = "sha256-g5qQASLprttRzBUGUE44JP1mhbvofLoWmbPRlmkJSrg=";
+    downloadToTemp = true;
+    postFetch = ''
+      ${gzip}/bin/gzip -dc "$downloadedFile" > "$out"
+    '';
   };
 
   ublockOrigin = fetchurl {
