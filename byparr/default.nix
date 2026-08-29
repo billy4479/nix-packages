@@ -7,7 +7,7 @@
 }:
 
 let
-  version = "2.1.0-unstable-2026-07-24";
+  version = "3.0.4";
   source = callPackage ./source.nix { inherit version; };
   pythonEnv = callPackage ./python-env.nix {
     inherit
@@ -18,12 +18,16 @@ let
       version
       ;
   };
-  camoufox = callPackage ./camoufox.nix { };
+  stealthfox = callPackage ./stealthfox.nix {
+    inherit pythonEnv;
+  };
+  geoip = callPackage ./geoip.nix { };
   byparr = callPackage ./package.nix {
     inherit
-      camoufox
+      geoip
       pythonEnv
       source
+      stealthfox
       version
       ;
   };
@@ -31,10 +35,9 @@ in
 {
   inherit
     byparr
-    camoufox
+    geoip
     pythonEnv
     source
+    stealthfox
     ;
-
-  inherit (camoufox) geolite ublockOrigin;
 }

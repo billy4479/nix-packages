@@ -53,9 +53,8 @@
             byparr = byparrPackages.byparr;
             byparr-source = byparrPackages.source;
             byparr-python-env = byparrPackages.pythonEnv;
-            byparr-camoufox = byparrPackages.camoufox;
-            byparr-geolite = byparrPackages.geolite;
-            byparr-ublock-origin = byparrPackages.ublockOrigin;
+            byparr-stealthfox = byparrPackages.stealthfox;
+            byparr-geoip = byparrPackages.geoip;
             libvpl-tools = callPackage ./libvpl-tools { };
             mc-router = callPackage ./mc-router { };
             lunamultiplayer-server = callPackage ./lunamultiplayer-server { };
