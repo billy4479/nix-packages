@@ -20,6 +20,16 @@ rustPlatform.buildRustPackage {
 
   cargoLock.lockFile = ./Cargo.lock;
 
+  patches = [
+    ./fix-response-deserialization.patch
+    ./compact-output.patch
+    ./default-compact.patch
+    ./english-output.patch
+    ./limit-option.patch
+    ./env-config.patch
+    ./search-only-cli.patch
+  ];
+
   postPatch = ''
     cp ${./Cargo.lock} Cargo.lock
   '';
