@@ -1,0 +1,40 @@
+{
+  lib,
+  openssl,
+  pkg-config,
+  rustPlatform,
+  fetchFromGitea,
+}:
+
+rustPlatform.buildRustPackage rec {
+  pname = "searxng";
+  version = "0.1.0";
+
+  src = fetchFromGitea {
+    domain = "codeberg.org";
+    owner = "slundi";
+    repo = "searxng";
+    rev = "5fbf5ccd9a9386bc5d016bfa80a7d68e71e3ce89";
+    hash = "sha256-L41yUfOvkRTLlfLYZvKV8xvc3ANUSNl6UpYBiBKn3rI=";
+  };
+
+  cargoLock.lockFile = ./Cargo.lock;
+
+  postPatch = ''
+    cp ${./Cargo.lock} Cargo.lock
+  '';
+
+  nativeBuildInputs = [ pkg-config ];
+  buildInputs = [ openssl ];
+
+  meta = {
+    description = "Asynchronous CLI and client library for SearXNG";
+    longDescription = ''
+      Asynchronous CLI for SearXNG written in Rust, with XDG support for
+      configuration. Also provides the searxng_client Rust library.
+    '';
+    homepage = "https://codeberg.org/slundi/searxng";
+    license = lib.licenses.asl20;
+    mainProgram = "searxng";
+  };
+}

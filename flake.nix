@@ -59,6 +59,7 @@
             mc-router = callPackage ./mc-router { };
             lunamultiplayer-server = callPackage ./lunamultiplayer-server { };
             mcp-searxng = callPackage ./mcp-searxng { };
+            searxng = callPackage ./searxng { };
             openchamber = callPackage ./openchamber { };
             openchamber-web = callPackage ./openchamber-web { };
 
