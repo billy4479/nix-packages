@@ -6,8 +6,8 @@
   fetchFromGitea,
 }:
 
-rustPlatform.buildRustPackage rec {
-  pname = "searxng";
+rustPlatform.buildRustPackage {
+  pname = "searxng-cli";
   version = "0.1.0";
 
   src = fetchFromGitea {
@@ -29,10 +29,6 @@ rustPlatform.buildRustPackage rec {
 
   meta = {
     description = "Asynchronous CLI and client library for SearXNG";
-    longDescription = ''
-      Asynchronous CLI for SearXNG written in Rust, with XDG support for
-      configuration. Also provides the searxng_client Rust library.
-    '';
     homepage = "https://codeberg.org/slundi/searxng";
     license = lib.licenses.asl20;
     mainProgram = "searxng";
