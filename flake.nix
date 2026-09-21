@@ -47,7 +47,6 @@
             };
           in
           rec {
-            apple-fonts = callPackage ./apple-fonts { };
             google-sans = callPackage ./google-sans { };
             prefetch-all-images = callPackage ./prefetch-all-images { };
             byparr = byparrPackages.byparr;
