@@ -59,7 +59,6 @@
             lunamultiplayer-server = callPackage ./lunamultiplayer-server { };
             mcp-searxng = callPackage ./mcp-searxng { };
             searxng-cli = callPackage ./searxng-cli { };
-            openchamber = callPackage ./openchamber { };
             openchamber-web = callPackage ./openchamber-web { };
 
             caveclient = callPackage ./caveclient { };

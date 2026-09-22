@@ -7,13 +7,13 @@
 }:
 
 rec {
-  version = "1.18.1";
+  version = "1.24.2";
 
   src = fetchFromGitHub {
     owner = "openchamber";
     repo = "openchamber";
     tag = "v${version}";
-    hash = "sha256-5pVqhwVr44EepRDMIEZeyyvw/Yoi/tFOcPr9RSHus9I=";
+    hash = "sha256-89hKIXndRBfLOzFPmeYA/Hnl7mUIFGB3hlpjdUcmhLI=";
   };
 
   mkBunModules =
@@ -88,7 +88,6 @@ rec {
       chmod -R u+w node_modules
       patchShebangs node_modules
       node fix-deprecation.js
-      node_modules/.bin/patch-package
     '';
 
   installKatexFonts = ''
