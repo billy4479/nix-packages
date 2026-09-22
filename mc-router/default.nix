@@ -7,21 +7,21 @@
 }:
 buildGoModule (finalAttrs: {
   pname = "mc-router";
-  version = "1.44.0";
+  version = "1.47.1";
 
   src = fetchFromGitHub {
     owner = "itzg";
     repo = "mc-router";
     rev = "v${finalAttrs.version}";
-    hash = "sha256-sEXT/wllbLLByjV88Ul3oXAV7qS10HmqB7Inu54Ob+0=";
+    hash = "sha256-5rwIFnfsHKYTOE0F7UB9rO3fjk3VtU7YE/8q6uYYUDE=";
   };
 
   postPatch = ''
     substituteInPlace go.mod \
-      --replace-fail "go 1.26.4" "go 1.26.3"
+      --replace-fail "go 1.26.6" "go 1.26.3"
   '';
 
-  vendorHash = "sha256-r608oS6gOsOBcaHk8w/aoqtst9ZJvhx3d7+T5KsG79M=";
+  vendorHash = "sha256-cw9DHGctLp7+PjNlLgwWhAXpK30kRhv2N1Qkn/cTPYU=";
 
   meta = {
     description = "Routes Minecraft client connections to backend servers based upon the requested server address";
