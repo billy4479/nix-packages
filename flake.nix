@@ -56,6 +56,7 @@
             byparr-geoip = byparrPackages.geoip;
             libvpl-tools = callPackage ./libvpl-tools { };
             mc-router = callPackage ./mc-router { };
+            derper = callPackage ./derper { };
             lunamultiplayer-server = callPackage ./lunamultiplayer-server { };
             mcp-searxng = callPackage ./mcp-searxng { };
             searxng-cli = callPackage ./searxng-cli { };
