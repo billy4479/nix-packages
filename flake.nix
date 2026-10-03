@@ -62,6 +62,7 @@
             mcp-searxng = callPackage ./mcp-searxng { };
             searxng-cli = callPackage ./searxng-cli { };
             openchamber-web = callPackage ./openchamber-web { };
+            t3code = callPackage ./t3code { };
 
             caveclient = callPackage ./caveclient { };
             standard_transform = callPackage ./standard_transform { };
