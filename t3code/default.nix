@@ -198,13 +198,56 @@ stdenv.mkDerivation (finalAttrs: {
     # The CLI reads its version from the adjacent package.json.
     cp apps/server/package.json $out/lib/t3code/apps/server/package.json
 
-    # Sourcemaps are not served.
-    find $out/lib/t3code/apps/server/dist/client -name '*.map' -delete
+    # The build needs the full node_modules tree; everything below only
+    # prunes the installed copy in $out.
+
+    # Sourcemaps are not served and never read at run time: strip them
+    # everywhere (web client, server chunks and node_modules debug maps).
+    find $out/lib/t3code -name '*.map' -type f -delete
+
+    # pnpm's cmd-shims in .bin directories are build-time only and embed
+    # placeholder paths; nothing resolves through them at run time.
+    find $out/lib/t3code -type d -name .bin -prune -exec rm -rf {} +
+
+    # Docs, tests and TypeScript sources inside node_modules packages are
+    # dead weight at run time. Keep package.json (Node resolves ESM/CJS
+    # type and exports through it), LICENSE/NOTICE files and native
+    # *.node/*.wasm binaries.
+    for tree in $out/lib/t3code/node_modules $out/lib/t3code/apps/server/node_modules; do
+      find "$tree" \( -type d \( \
+             -name .github -o -name test -o -name tests -o -name __tests__ \
+             -o -name example -o -name examples -o -name docs \
+           \) \) -prune -exec rm -rf {} +
+      find "$tree" \( -type f \( \
+             -name '*.md' -o -name '*.markdown' -o -name '*.ts' \
+             -o -name '*.tsbuildinfo' \
+           \) \) -delete
+    done
+
+    # node-gyp intermediates: keep the compiled build/Release/*.node, drop
+    # the object files, makefiles, dependency lists and bundled C sources
+    # that only existed to produce it.
+    find $out/lib/t3code -type d -name obj.target -prune -exec rm -rf {} +
+    find $out/lib/t3code -type f -path '*/build/Makefile' -delete
+    find $out/lib/t3code -type d -name .deps -path '*/build/*' -prune -exec rm -rf {} +
+    find $out/lib/t3code -type d -name deps \
+      -exec sh -c 'for d; do if [ -d "$d/../build/Release" ]; then rm -rf "$d"; fi; done' sh {} +
+
+    # Native prebuilds ship one binary per platform; only linux-x64 can
+    # ever be dlopened here, so drop every other target.
+    find $out/lib/t3code/node_modules -type d -name prebuilds -print0 |
+      while IFS= read -r -d "" d; do
+        find "$d" -mindepth 1 -maxdepth 1 ! -name linux-x64 -exec rm -rf {} +
+      done
 
     # Drop symlinks whose targets are outside the installed tree: pnpm's
     # hidden hoist references packages outside the filtered install, and the
     # workspace links point at source packages that are bundled into dist.
     find $out/lib/t3code -xtype l -delete
+
+    # Empty out the directories the pruning left behind; this must run
+    # last so it also catches the earlier steps' leftovers.
+    find $out/lib/t3code -type d -empty -delete
 
     makeWrapper ${lib.getExe nodejs_24} $out/bin/t3 \
       --add-flags $out/lib/t3code/apps/server/dist/bin.mjs \
