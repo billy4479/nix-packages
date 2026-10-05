@@ -1,6 +1,7 @@
 {
   callPackage,
   cacert,
+  curl,
   fetchFromGitHub,
   git,
   lib,
@@ -119,6 +120,63 @@ let
       outputHash = hash;
     };
 
+  # The web build's third-party-licenses vite plugin reads SPDX license texts
+  # from its on-disk cache and falls back to downloading them from
+  # raw.githubusercontent.com, which is impossible in the sandbox. Prefetch
+  # every license the config references, mirroring the cache layout in
+  # scripts/lib/third-party-licenses.ts (SPDX_LICENSE_LIST_VERSION and
+  # SPDX_LICENSE_LIST_REVISION must be kept in sync with it).
+  spdxLicenseListVersion = "v3.28.0";
+  spdxLicenseListRevision = "c4a7237ec8f4654e867546f9f409749300f1bf4c";
+
+  spdxLicenses = stdenv.mkDerivation {
+    pname = "t3code-spdx-licenses";
+    inherit version src;
+
+    impureEnvVars = lib.fetchers.proxyImpureEnvVars;
+
+    nativeBuildInputs = [
+      cacert
+      curl
+      nodejs_24
+      writableTmpDirAsHomeHook
+    ];
+
+    installPhase = ''
+      runHook preInstall
+
+      # Collect every licenseId the third-party license config can generate a
+      # notice for, from both generatedNotices lists and singular
+      # generatedNotice overrides.
+      node -e '
+        const config = require(process.argv[1]);
+        const ids = new Set();
+        for (const entry of [
+          ...(config.customNotices ?? []),
+          ...(config.packageOverrides ?? []),
+        ]) {
+          for (const notice of entry.generatedNotices ?? []) ids.add(notice.licenseId);
+          if (entry.generatedNotice) ids.add(entry.generatedNotice.licenseId);
+        }
+        console.log([...ids].sort().join("\n"));
+      ' ${src}/third-party-licenses.config.json > license-ids
+
+      mkdir -p $out/spdx/${spdxLicenseListVersion}
+      while IFS= read -r licenseId; do
+        [ -n "$licenseId" ] || continue
+        curl -fsSL \
+          "https://raw.githubusercontent.com/spdx/license-list-data/${spdxLicenseListRevision}/json/details/''${licenseId}.json" \
+          -o "$out/spdx/${spdxLicenseListVersion}/''${licenseId}.json"
+      done < license-ids
+
+      runHook postInstall
+    '';
+
+    outputHashAlgo = "sha256";
+    outputHashMode = "recursive";
+    outputHash = "sha256-q9YkZJl2DRz2Adzfd4X2+g53tkPc26qZtP/qzgDEJV4=";
+  };
+
   nodeModules = mkNodeModules {
     pname = "t3code-node-modules";
     hash = "sha256-HN5WfjAZKKjvQgBycFMsxbEWj2ts/1xTy3x4SZlmHE0=";
@@ -172,6 +230,11 @@ stdenv.mkDerivation (finalAttrs: {
     done
     chmod -R u+w node_modules apps packages infra scripts oxlint-plugin-t3code 2>/dev/null || true
     patchShebangs node_modules
+
+    # Seed the SPDX cache so the third-party-licenses vite plugin serves
+    # license texts from disk instead of downloading them.
+    mkdir -p .generated/third-party-licenses
+    cp -R ${spdxLicenses}/. .generated/third-party-licenses/
 
     runHook postConfigure
   '';
@@ -280,7 +343,7 @@ stdenv.mkDerivation (finalAttrs: {
   noAuditTmpdir = true;
 
   passthru = {
-    inherit nodeModules prodNodeModules;
+    inherit nodeModules prodNodeModules spdxLicenses;
   };
 
   meta = {
