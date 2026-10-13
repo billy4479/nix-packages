@@ -6,16 +6,16 @@
 
 buildNpmPackage rec {
   pname = "mcp-searxng";
-  version = "2.3.0";
+  version = "2.5.1";
 
   src = fetchFromGitHub {
     owner = "ihor-sokoliuk";
     repo = "MCP-searxng";
     rev = "v${version}";
-    hash = "sha256-LMlbuPF8KuUZlD9HUjhunuHl2tmCMSeydBZiWuGWRHA=";
+    hash = "sha256-TqDj86FTOekTswNQkTkiC8Q/H46bz4iigr5GRlM9Tno=";
   };
 
-  npmDepsHash = "sha256-MqVn66vCbB8+3o6KB6GCU9GxsPtqeCYjTbI5A3nfTVs=";
+  npmDepsHash = "sha256-WuN8xzG5uU1wZdMLdiT2GfUn1BeHTdtIkBc4x2kz81Q=";
 
   meta = {
     description = "MCP server for SearXNG integration";
