@@ -1,0 +1,308 @@
+diff --git a/server/displayname_test.go b/server/displayname_test.go
+new file mode 100644
+index 0000000..492a1f2
+--- /dev/null
++++ b/server/displayname_test.go
+@@ -0,0 +1,211 @@
++// Copyright (c) Tailscale Inc & AUTHORS
++// SPDX-License-Identifier: BSD-3-Clause
++
++package server
++
++import (
++	"encoding/base64"
++	"encoding/json"
++	"net/http"
++	"net/http/httptest"
++	"net/url"
++	"strings"
++	"testing"
++	"time"
++
++	"tailscale.com/client/tailscale/apitype"
++	"tailscale.com/tailcfg"
++)
++
++// TestUsernameFromDisplayName covers usernameFromDisplayName in isolation:
++// lowercase, spaces to underscores, trimming, and the guards that signal
++// "no display-name username available" by returning "".
++func TestUsernameFromDisplayName(t *testing.T) {
++	tests := []struct {
++		name        string
++		displayName string
++		want        string
++	}{
++		{name: "lowercased", displayName: "Jack", want: "jack"},
++		{name: "spaces become underscores", displayName: "Mary Jane", want: "mary_jane"},
++		{name: "surrounding whitespace trimmed", displayName: "  Jack  ", want: "jack"},
++		{name: "email-shaped display name rejected", displayName: "jack@example.com", want: ""},
++		{name: "empty display name", displayName: "", want: ""},
++		{name: "whitespace-only display name", displayName: "   ", want: ""},
++	}
++
++	for _, tt := range tests {
++		t.Run(tt.name, func(t *testing.T) {
++			if got := usernameFromDisplayName(tt.displayName); got != tt.want {
++				t.Errorf("usernameFromDisplayName(%q) = %q, want %q", tt.displayName, got, tt.want)
++			}
++		})
++	}
++}
++
++// displaynameTestUser is the WhoIs identity used below: headscale builds
++// LoginName from the user's email and DisplayName from their display name.
++func displaynameTestUser(loginName, displayName string) *apitype.WhoIsResponse {
++	return &apitype.WhoIsResponse{
++		Node: &tailcfg.Node{
++			ID:   1,
++			Name: "node1.example.ts.net",
++			User: tailcfg.UserID(1),
++		},
++		UserProfile: &tailcfg.UserProfile{
++			LoginName:   loginName,
++			DisplayName: displayName,
++		},
++	}
++}
++
++// decodeIDTokenClaims decodes the JWT payload of an ID token.
++func decodeIDTokenClaims(t *testing.T, token string) map[string]any {
++	t.Helper()
++	parts := strings.Split(token, ".")
++	if len(parts) != 3 {
++		t.Fatalf("malformed JWT: %q", token)
++	}
++	payload, err := base64.RawURLEncoding.DecodeString(parts[1])
++	if err != nil {
++		t.Fatalf("failed to decode JWT payload: %v", err)
++	}
++	var claims map[string]any
++	if err := json.Unmarshal(payload, &claims); err != nil {
++		t.Fatalf("failed to unmarshal JWT payload: %v", err)
++	}
++	return claims
++}
++
++// exchangeCode runs an authorization code grant through /token and then the
++// resulting access token through /userinfo, returning the ID token claims
++// and the userinfo response.
++func exchangeCode(t *testing.T, s *IDPServer, who *apitype.WhoIsResponse) (map[string]any, map[string]any) {
++	t.Helper()
++	const (
++		code        = "test-code"
++		redirectURI = "https://rp.example.com/callback"
++	)
++
++	s.mu.Lock()
++	s.code[code] = &AuthRequest{
++		FunnelRP:    s.funnelClients["test-client"],
++		ClientID:    "test-client",
++		RedirectURI: redirectURI,
++		Scopes:      []string{"openid", "profile", "email"},
++		RemoteUser:  who,
++		ValidTill:   time.Now().Add(5 * time.Minute),
++	}
++	s.mu.Unlock()
++
++	form := url.Values{
++		"grant_type":    {"authorization_code"},
++		"code":          {code},
++		"redirect_uri":  {redirectURI},
++		"client_id":     {"test-client"},
++		"client_secret": {"test-secret"},
++	}
++	rr := httptest.NewRecorder()
++	s.serveToken(rr, postTokenForm(form))
++	if rr.Code != http.StatusOK {
++		t.Fatalf("serveToken() = %d: %s", rr.Code, rr.Body.String())
++	}
++
++	var tokenResp oidcTokenResponse
++	if err := json.Unmarshal(rr.Body.Bytes(), &tokenResp); err != nil {
++		t.Fatalf("failed to unmarshal token response: %v", err)
++	}
++
++	req := httptest.NewRequest("GET", "/userinfo", nil)
++	req.Header.Set("Authorization", "Bearer "+tokenResp.AccessToken)
++	rr = httptest.NewRecorder()
++	s.serveUserInfo(rr, req)
++	if rr.Code != http.StatusOK {
++		t.Fatalf("serveUserInfo() = %d: %s", rr.Code, rr.Body.String())
++	}
++
++	var info map[string]any
++	if err := json.Unmarshal(rr.Body.Bytes(), &info); err != nil {
++		t.Fatalf("failed to unmarshal userinfo: %v", err)
++	}
++	return decodeIDTokenClaims(t, tokenResp.IDToken), info
++}
++
++// TestUsernameClaimsFromDisplayName runs /token and /userinfo end to end:
++// the username claims are derived from the WhoIs display name per the
++// deployment invariant, falling back to the LoginName local part when the
++// display name yields nothing, and omitted when LoginName has no @.
++func TestUsernameClaimsFromDisplayName(t *testing.T) {
++	tests := []struct {
++		name string
++		// WhoIs identity
++		loginName   string
++		displayName string
++		// expectations; a string, or nil for an absent claim
++		wantPreferred any
++		wantUsername  any
++		wantName      any // userinfo name: the raw display name, or absent
++	}{
++		{
++			name:          "display name becomes the username",
++			loginName:     "jack@example.com",
++			displayName:   "Jack",
++			wantPreferred: "jack",
++			wantUsername:  "jack",
++			wantName:      "Jack",
++		},
++		{
++			name:          "multi-word display name",
++			loginName:     "jack@example.com",
++			displayName:   "Mary Jane",
++			wantPreferred: "mary_jane",
++			wantUsername:  "mary_jane",
++			wantName:      "Mary Jane",
++		},
++		{
++			name:          "email-shaped display name falls back to LoginName local part",
++			loginName:     "jack@example.com",
++			displayName:   "jack@example.com",
++			wantPreferred: "jack",
++			wantUsername:  "jack",
++			wantName:      "jack@example.com",
++		},
++		{
++			name:          "no @ in LoginName and no display name: claims absent",
++			loginName:     "plainname",
++			displayName:   "",
++			wantPreferred: nil,
++			wantUsername:  nil,
++			wantName:      nil,
++		},
++	}
++
++	for _, tt := range tests {
++		t.Run(tt.name, func(t *testing.T) {
++			s := setupTestServer(t, nil)
++			claims, info := exchangeCode(t, s, displaynameTestUser(tt.loginName, tt.displayName))
++
++			if got, ok := claims["preferred_username"]; ok != (tt.wantPreferred != nil) || (ok && got != tt.wantPreferred) {
++				t.Errorf("ID token preferred_username = %v (present: %v), want %v", got, ok, tt.wantPreferred)
++			}
++			if got, ok := info["username"]; ok != (tt.wantUsername != nil) || (ok && got != tt.wantUsername) {
++				t.Errorf("userinfo username = %v (present: %v), want %v", got, ok, tt.wantUsername)
++			}
++
++			// email, name and sub are untouched by the derivation.
++			wantEmail := s.realishEmail(tt.loginName)
++			if claims["email"] != wantEmail {
++				t.Errorf("ID token email = %v, want %v", claims["email"], wantEmail)
++			}
++			if info["email"] != wantEmail {
++				t.Errorf("userinfo email = %v, want %v", info["email"], wantEmail)
++			}
++			if got, ok := info["name"]; ok != (tt.wantName != nil) || (ok && got != tt.wantName) {
++				t.Errorf("userinfo name = %v (present: %v), want %v", got, ok, tt.wantName)
++			}
++			if claims["sub"] != "userid:1" {
++				t.Errorf("ID token sub = %v, want userid:1", claims["sub"])
++			}
++		})
++	}
++}
+diff --git a/server/token.go b/server/token.go
+index ea1516f..e2a6643 100644
+--- a/server/token.go
++++ b/server/token.go
+@@ -566,7 +566,12 @@ func (s *IDPServer) issueTokens(w http.ResponseWriter, r *http.Request, ar *Auth
+ 		case "email":
+ 			tsClaims.Email = s.realishEmail(who.UserProfile.LoginName)
+ 		case "profile":
+-			if username, _, ok := strings.Cut(who.UserProfile.LoginName, "@"); ok {
++			// Prefer the username derived from the WhoIs display name
++			// (see usernameFromDisplayName); fall back to the LoginName
++			// local part, omitted when LoginName has no @.
++			if name := usernameFromDisplayName(who.UserProfile.DisplayName); name != "" {
++				tsClaims.PreferredUsername = name
++			} else if username, _, ok := strings.Cut(who.UserProfile.LoginName, "@"); ok {
+ 				tsClaims.PreferredUsername = username
+ 			}
+ 			tsClaims.Picture = who.UserProfile.ProfilePicURL
+diff --git a/server/userinfo.go b/server/userinfo.go
+index c0a071c..4edd0bf 100644
+--- a/server/userinfo.go
++++ b/server/userinfo.go
+@@ -88,7 +88,12 @@ func (s *IDPServer) serveUserInfo(w http.ResponseWriter, r *http.Request) {
+ 	ui.Name = ar.RemoteUser.UserProfile.DisplayName
+ 	ui.Picture = ar.RemoteUser.UserProfile.ProfilePicURL
+ 	ui.Email = s.realishEmail(ar.RemoteUser.UserProfile.LoginName)
+-	if username, _, ok := strings.Cut(ar.RemoteUser.UserProfile.LoginName, "@"); ok {
++	// Prefer the username derived from the WhoIs display name (see
++	// usernameFromDisplayName); fall back to the LoginName local part,
++	// omitted when LoginName has no @.
++	if name := usernameFromDisplayName(ar.RemoteUser.UserProfile.DisplayName); name != "" {
++		ui.Username = name
++	} else if username, _, ok := strings.Cut(ar.RemoteUser.UserProfile.LoginName, "@"); ok {
+ 		ui.Username = username
+ 	}
+ 
+diff --git a/server/userinfo_test.go b/server/userinfo_test.go
+index a2e98d8..f3854d3 100644
+--- a/server/userinfo_test.go
++++ b/server/userinfo_test.go
+@@ -191,7 +191,12 @@ func TestExtraUserInfo(t *testing.T) {
+ 			tt.expected["name"] = profile.DisplayName
+ 			tt.expected["email"] = profile.LoginName
+ 			tt.expected["picture"] = profile.ProfilePicURL
+-			tt.expected["username"], _, _ = strings.Cut(profile.LoginName, "@")
++			tt.expected["username"] = usernameFromDisplayName(profile.DisplayName)
++			if tt.expected["username"] == "" {
++				// No display-name username available: the claim falls
++				// back to the LoginName local part.
++				tt.expected["username"], _, _ = strings.Cut(profile.LoginName, "@")
++			}
+ 
+ 			gotNormalized := normalizeMap(t, resp)
+ 			expectedNormalized := normalizeMap(t, tt.expected)
+diff --git a/server/username.go b/server/username.go
+new file mode 100644
+index 0000000..b041d95
+--- /dev/null
++++ b/server/username.go
+@@ -0,0 +1,31 @@
++// Copyright (c) Tailscale Inc & AUTHORS
++// SPDX-License-Identifier: BSD-3-Clause
++
++package server
++
++import "strings"
++
++// usernameFromDisplayName derives an OIDC username claim from a WhoIs
++// display name. headscale builds its WhoIs user profile as
++//
++//	DisplayName = cmp.Or(DisplayName, Username())
++//	LoginName   = cmp.Or(Email, Name, ProviderIdentifier, ID)
++//
++// so DisplayName carries the human display name (e.g. "Jack", "Mary Jane")
++// and LoginName usually carries the email address. The deployment invariant
++// is that every headscale user has a display name whose normalized form
++// equals their short username: lowercase, with spaces replaced by
++// underscores.
++//
++// It returns "" when no username can be derived this way, in which case
++// callers fall back to the LoginName local part: an empty or whitespace-only
++// display name, or one that is an email address (headscale fell back to the
++// email because no display name was set, and the local part of an email is
++// not a username).
++func usernameFromDisplayName(displayName string) string {
++	name := strings.TrimSpace(displayName)
++	if name == "" || strings.Contains(name, "@") {
++		return ""
++	}
++	return strings.ReplaceAll(strings.ToLower(name), " ", "_")
++}
