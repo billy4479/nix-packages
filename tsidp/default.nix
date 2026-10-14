@@ -16,7 +16,10 @@ buildGoModule (finalAttrs: {
     hash = "sha256-PaMhJH7Zx+jSZ6HHMzYEMovE1ZsbvZzLdZKgNIu4VKY=";
   };
 
-  patches = [ ./headscale-proxy.patch ];
+  patches = [
+    ./headscale-proxy.patch
+    ./public-clients.patch
+  ];
 
   vendorHash = "sha256-/7L5Be2H3XHHgC5So/cTYekb1sxil8iwDB+9nlPP56A=";
 
