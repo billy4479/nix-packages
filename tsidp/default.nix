@@ -20,6 +20,7 @@ buildGoModule (finalAttrs: {
     ./headscale-proxy.patch
     ./public-clients.patch
     ./displayname-username.patch
+    ./browser-rp-cors.patch
   ];
 
   vendorHash = "sha256-/7L5Be2H3XHHgC5So/cTYekb1sxil8iwDB+9nlPP56A=";
