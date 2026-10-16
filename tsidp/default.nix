@@ -19,7 +19,6 @@ buildGoModule (finalAttrs: {
   patches = [
     ./headscale-proxy.patch
     ./public-clients.patch
-    ./displayname-username.patch
     ./browser-rp-cors.patch
   ];
 
