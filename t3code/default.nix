@@ -12,6 +12,7 @@
   python3,
   stdenv,
   writableTmpDirAsHomeHook,
+  writeShellScript,
 }:
 
 let
@@ -344,6 +345,11 @@ stdenv.mkDerivation (finalAttrs: {
 
   passthru = {
     inherit nodeModules prodNodeModules spdxLicenses;
+    updateScript = import ../lib/make-update-script.nix {
+      inherit writeShellScript;
+      pkgPath = ./.;
+      name = "update-t3code";
+    };
   };
 
   meta = {

@@ -4,7 +4,7 @@
   go_1_27,
 
   lib,
-  ...
+  writeShellScript,
 }:
 (buildGoModule.override { go = go_1_27; }) (finalAttrs: {
   pname = "derper";
@@ -27,6 +27,12 @@
     "-X tailscale.com/version.longStamp=${finalAttrs.version}"
     "-X tailscale.com/version.shortStamp=${finalAttrs.version}"
   ];
+
+  passthru.updateScript = import ../lib/make-update-script.nix {
+    inherit writeShellScript;
+    pkgPath = ./.;
+    name = "update-derper";
+  };
 
   meta = {
     description = "Standalone Tailscale DERP relay and STUN server";

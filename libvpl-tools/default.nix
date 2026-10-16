@@ -22,6 +22,7 @@
   libsysprof-capture,
   libepoxy,
   libpciaccess,
+  writeShellScript,
 }:
 
 stdenv.mkDerivation {
@@ -64,6 +65,12 @@ stdenv.mkDerivation {
     libepoxy
     libpciaccess
   ];
+
+  passthru.updateScript = import ../lib/make-update-script.nix {
+    inherit writeShellScript;
+    pkgPath = ./.;
+    name = "update-libvpl-tools";
+  };
 
   meta = with lib; {
     description = "Intel® Video Processing Library (Intel® VPL) Tools";

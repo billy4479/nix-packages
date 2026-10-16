@@ -3,7 +3,7 @@
   fetchFromGitHub,
 
   lib,
-  ...
+  writeShellScript,
 }:
 buildGoModule (finalAttrs: {
   pname = "tsidp";
@@ -31,6 +31,12 @@ buildGoModule (finalAttrs: {
   ];
 
   doCheck = true;
+
+  passthru.updateScript = import ../lib/make-update-script.nix {
+    inherit writeShellScript;
+    pkgPath = ./.;
+    name = "update-tsidp";
+  };
 
   meta = {
     description = "Tailscale OIDC Identity Provider";

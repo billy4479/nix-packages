@@ -1,4 +1,8 @@
-{ stdenvNoCC, fetchFromGitHub, ... }:
+{
+  stdenvNoCC,
+  fetchFromGitHub,
+  writeShellScript,
+}:
 stdenvNoCC.mkDerivation {
   pname = "google-sans";
   version = "0-unstable-2025-09-11";
@@ -19,4 +23,10 @@ stdenvNoCC.mkDerivation {
       chmod 644 *.ttf
       mv *.ttf $out/share/fonts/truetype/Google-Sans
     '';
+
+  passthru.updateScript = import ../lib/make-update-script.nix {
+    inherit writeShellScript;
+    pkgPath = ./.;
+    name = "update-google-sans";
+  };
 }

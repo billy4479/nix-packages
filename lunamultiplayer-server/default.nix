@@ -4,7 +4,7 @@
 
   dotnet-sdk_10,
   dotnet-runtime_10,
-  ...
+  writeShellScript,
 }:
 let
   version = "0.29.2";
@@ -48,4 +48,10 @@ buildDotnetModule {
   '';
 
   nugetDeps = ./deps.json;
+
+  passthru.updateScript = import ../lib/make-update-script.nix {
+    inherit writeShellScript;
+    pkgPath = ./.;
+    name = "update-lunamultiplayer-server";
+  };
 }

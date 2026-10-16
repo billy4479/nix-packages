@@ -12,6 +12,7 @@
   installShellFiles,
   versionCheckHook,
   writableTmpDirAsHomeHook,
+  writeShellScript,
   node_modules ? callPackage ./node-modules.nix { },
 }:
 stdenvNoCC.mkDerivation (finalAttrs: {
@@ -125,12 +126,17 @@ stdenvNoCC.mkDerivation (finalAttrs: {
   passthru = {
     env = finalAttrs.env;
     inherit node_modules;
+    updateScript = import ../lib/make-update-script.nix {
+      inherit writeShellScript;
+      pkgPath = ./.;
+      name = "update-opencode";
+    };
   };
 
   meta = {
     description = "The open source coding agent";
     homepage = "https://opencode.ai";
-    changelog = "https://github.com/sst/opencode/releases/tag/v${finalAttrs.version}";
+    changelog = "https://github.com/anomalyco/opencode/releases/tag/v${finalAttrs.version}";
     license = lib.licenses.mit;
     mainProgram = "opencode";
     inherit (node_modules.meta) platforms;

@@ -7,6 +7,7 @@
   stdenvNoCC,
   stealthfox,
   version,
+  writeShellScript,
   xorg-server,
 }:
 
@@ -41,6 +42,14 @@ stdenvNoCC.mkDerivation {
 
     runHook postInstall
   '';
+
+  passthru = {
+    updateScript = import ../lib/make-update-script.nix {
+      inherit writeShellScript;
+      pkgPath = ./.;
+      name = "update-byparr";
+    };
+  };
 
   meta = {
     mainProgram = "byparr";

@@ -9,6 +9,7 @@
   python3,
   stdenv,
   writableTmpDirAsHomeHook,
+  writeShellScript,
 }:
 
 let
@@ -117,6 +118,11 @@ stdenv.mkDerivation (finalAttrs: {
 
   passthru = {
     inherit (finalAttrs) buildNodeModules runtimeNodeModules;
+    updateScript = import ../lib/make-update-script.nix {
+      inherit writeShellScript;
+      pkgPath = ./.;
+      name = "update-openchamber-web";
+    };
   };
 
   meta = {
