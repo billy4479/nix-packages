@@ -59,7 +59,7 @@
             tsidp = callPackage ./tsidp { };
             lunamultiplayer-server = callPackage ./lunamultiplayer-server { };
             searxng-cli = callPackage ./searxng-cli { };
-            openchamber-web = callPackage ./openchamber-web { };
+            openchamber-web = callPackage ./openchamber-web { opencode = opencode; };
             opencode = callPackage ./opencode { };
           };
 
