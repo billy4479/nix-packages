@@ -60,7 +60,6 @@
             lunamultiplayer-server = callPackage ./lunamultiplayer-server { };
             searxng-cli = callPackage ./searxng-cli { };
             openchamber-web = callPackage ./openchamber-web { };
-            t3code = callPackage ./t3code { };
             opencode = callPackage ./opencode { };
           };
 
