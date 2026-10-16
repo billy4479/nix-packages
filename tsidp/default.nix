@@ -1,19 +1,20 @@
 {
   buildGoModule,
   fetchFromGitHub,
+  go_1_27,
 
   lib,
   writeShellScript,
 }:
-buildGoModule (finalAttrs: {
+(buildGoModule.override { go = go_1_27; }) (finalAttrs: {
   pname = "tsidp";
-  version = "unstable-2026-09-24";
+  version = "0.0.17";
 
   src = fetchFromGitHub {
     owner = "tailscale";
     repo = "tsidp";
-    rev = "8fa860f333d9b0ed7eee66e0c7c08531f743fd16";
-    hash = "sha256-PaMhJH7Zx+jSZ6HHMzYEMovE1ZsbvZzLdZKgNIu4VKY=";
+    rev = "v${finalAttrs.version}";
+    hash = "sha256-1LNz8Q1czxkSIGA2tV5kbahtse3Zi9qx2TGuKG+bdl4=";
   };
 
   patches = [
@@ -22,7 +23,7 @@ buildGoModule (finalAttrs: {
     ./browser-rp-cors.patch
   ];
 
-  vendorHash = "sha256-/7L5Be2H3XHHgC5So/cTYekb1sxil8iwDB+9nlPP56A=";
+  vendorHash = "sha256-X3o71xgGBFJM3Sspb+223NYsDwJ3jf+9lCWQxS6JDA8=";
 
   ldflags = [
     "-s"
@@ -45,3 +46,4 @@ buildGoModule (finalAttrs: {
     mainProgram = "tsidp";
   };
 })
+
