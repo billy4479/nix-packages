@@ -41,9 +41,11 @@
 }:
 
 let
-  # The patched Firefox build sealed inside invisible-core 20.15.0.
-  # URL, hash and ini facts all come from invisible_core/seal.json; the
-  # build asserts the archive against the seal so a stale pin fails loudly.
+  # The patched Firefox build sealed inside the invisible-core that the
+  # source ships. URL, hash and ini facts all come from
+  # invisible_core/seal.json; the build asserts the archive against the seal
+  # so a stale pin fails loudly, and byparr/update.sh rewrites this pin from
+  # the seal on every run.
   engineArchive = fetchurl {
     url = "https://github.com/feder-cr/firefox_antidetect_patch/releases/download/firefox-20/firefox-151.0-stealth-linux-x86_64.tar.gz";
     hash = "sha256-1WWIgMv41sNPjXEEOhiscujKWilpKOtffvnjKkZR2IQ=";
