@@ -5,7 +5,7 @@
 }:
 stdenvNoCC.mkDerivation {
   pname = "google-sans";
-  version = "0-unstable-2025-09-11";
+  version = "0-unstable-2025-08-26";
   src = fetchFromGitHub {
     owner = "hprobotic";
     repo = "Google-Sans-Font";
