@@ -8,13 +8,13 @@
 }:
 (buildGoModule.override { go = go_1_27; }) (finalAttrs: {
   pname = "tsidp";
-  version = "0.0.17";
+  version = "0.0.18";
 
   src = fetchFromGitHub {
     owner = "tailscale";
     repo = "tsidp";
     rev = "v${finalAttrs.version}";
-    hash = "sha256-1LNz8Q1czxkSIGA2tV5kbahtse3Zi9qx2TGuKG+bdl4=";
+    hash = "sha256-oL+WH5iFVRd0erh3KfJrvUMIpZraomHoRzo5sh3duu0=";
   };
 
   patches = [
