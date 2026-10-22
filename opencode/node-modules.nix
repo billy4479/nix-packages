@@ -10,13 +10,13 @@
     ]).nodeModules.${stdenvNoCC.hostPlatform.system},
 }:
 let
-  version = "2.0.31";
+  version = "2.1.3";
 
   src' = fetchFromGitHub {
     owner = "anomalyco";
     repo = "opencode";
     tag = "v${version}";
-    hash = "sha256-dnTXxh5z2M3EydDiWFebd5/BiSuWBJnW7nlxjYGxmxU=";
+    hash = "sha256-b4+ZFgnlAuQMkRXBnYsEcHdhPsTfCZnEYArzdWP2TK4=";
   };
 
   # Filtered to what the node_modules install and the CLI build need.
