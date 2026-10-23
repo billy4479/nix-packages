@@ -33,7 +33,7 @@ stdenv.mkDerivation (finalAttrs: {
       "--linker=hoisted"
       "--no-progress"
     ];
-    hash = "sha256-ZkmJH8Iv+hHcsA9vRU9n9oAyEAQM9pjCBPBsTLKuM20=";
+    hash = "sha256-b13NJaa1LD981htFWL7Ga9JdR9tLSCetcMmr5hJ5eas=";
   };
 
   runtimeNodeModules = common.mkBunModules {
@@ -47,7 +47,7 @@ stdenv.mkDerivation (finalAttrs: {
       "--no-progress"
       "--production"
     ];
-    hash = "sha256-s6FWWkq60uud61Kmm3YdSJWyAJcrObyHHjsFNUq8ExY=";
+    hash = "sha256-dzaEP8SqMayzcAohns78xb4xHjKUKo7EARnKH47rWdo=";
   };
 
   nativeBuildInputs = [
