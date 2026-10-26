@@ -61,6 +61,7 @@
             searxng-cli = callPackage ./searxng-cli { };
             openchamber-web = callPackage ./openchamber-web { opencode = opencode; };
             opencode = callPackage ./opencode { };
+            wa-crypt-tools = callPackage ./wa-crypt-tools { };
           };
 
         devShells.default = pkgs.mkShell {
