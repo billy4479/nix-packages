@@ -7,13 +7,13 @@
 }:
 
 rec {
-  version = "2.5.1";
+  version = "2.5.3";
 
   src = fetchFromGitHub {
     owner = "openchamber";
     repo = "openchamber";
     tag = "v${version}";
-    hash = "sha256-tQAiOQ9Wjx751vUFObDkrXN5YHRivmG/uAbdul/Ld6A=";
+    hash = "sha256-oGhyNCMEvSxIvgzIcBzkan5BmldAhRJmrusnd/uVmbI=";
   };
 
   mkBunModules =
