@@ -1,6 +1,7 @@
 {
   callPackage,
   lib,
+  nodejs,
   pyproject-build-systems,
   pyproject-nix,
   python314,
@@ -50,7 +51,7 @@ let
         ]
       );
 in
-pythonSet.mkVirtualEnv "byparr-python-env-${version}" {
+(pythonSet.mkVirtualEnv "byparr-python-env-${version}" {
   fastapi = [ "standard" ];
   invisible-playwright = [ ];
   playwright = [ ];
@@ -58,4 +59,21 @@ pythonSet.mkVirtualEnv "byparr-python-env-${version}" {
   pydantic = [ ];
   pydantic-settings = [ ];
   trafilatura = [ ];
-}
+}).overrideAttrs
+  (prev: {
+    # Playwright wheels bundle a prebuilt node binary to run the driver.
+    # Nix ELF post-processing corrupts it: the patched binary ends up with
+    # overlapping PT_LOAD segments whose later read-only mapping replaces the
+    # read-write one, so ld.so segfaults in dl_main writing DT_DEBUG and every
+    # browser launch dies with "Connection closed while reading from the
+    # driver" (this is why all Byparr solves 500'd from 2026-10-23). Run the
+    # driver with a Nix-built nodejs instead, like nixpkgs' playwright package
+    # does via driver-location.patch.
+    postInstall =
+      (prev.postInstall or "")
+      + ''
+        chmod -R u+w "$out/${python314.sitePackages}/playwright/driver"
+        rm "$out/${python314.sitePackages}/playwright/driver/node"
+        ln -s "${lib.getExe nodejs}" "$out/${python314.sitePackages}/playwright/driver/node"
+      '';
+  })
