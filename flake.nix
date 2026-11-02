@@ -62,6 +62,7 @@
             openchamber-web = callPackage ./openchamber-web { opencode = opencode; };
             opencode = callPackage ./opencode { };
             wa-crypt-tools = callPackage ./wa-crypt-tools { };
+            mircrewrr = callPackage ./mircrewrr { };
           };
 
         devShells.default = pkgs.mkShell {
