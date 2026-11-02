@@ -8,18 +8,18 @@
 }:
 (buildGoModule.override { go = go_1_27; }) (finalAttrs: {
   pname = "derper";
-  version = "1.104.2";
+  version = "1.104.4";
 
   src = fetchFromGitHub {
     owner = "tailscale";
     repo = "tailscale";
     rev = "v${finalAttrs.version}";
-    hash = "sha256-vMkNFJSwf/UPCUnMZiFd+cfOspdvHMU4GPs/LAqxib0=";
+    hash = "sha256-sJh3oXFarS1s+flMfm4ZAE+0ZSwp8F3Rib76+qBFVIw=";
   };
 
   subPackages = [ "cmd/derper" ];
 
-  vendorHash = "sha256-VxuDS8QKZ82W/MOlfng0+ZCPSPl5KnK3FYW1puDiNe4=";
+  vendorHash = "sha256-RvaouD88naVNOPJBVcqMaAn+ovjXI4g83ShCdRiR5/Q=";
 
   ldflags = [
     "-s"

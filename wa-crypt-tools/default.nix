@@ -10,13 +10,13 @@ python3Packages.buildPythonApplication (finalAttrs: {
   # The newest release tag is v0.1.0; master carries version 0.2.0 in
   # pyproject.toml, so the base version follows it and the date marks the
   # tracked commit.
-  version = "0.2.0-unstable-2026-10-06";
+  version = "0.2.0-unstable-2026-10-27";
 
   src = fetchFromGitHub {
     owner = "ElDavoo";
     repo = "wa-crypt-tools";
-    rev = "b16a805a394b8e243334f286dcf30f262e60db4f";
-    hash = "sha256-L/HL3l9VR02qLhOoGYgsz/bYb/cSLDEXw0U5ZFDlszE=";
+    rev = "b6f67453d19e443f53f57da0361f3ef5e8b6821d";
+    hash = "sha256-beEHOrqx1MutS5fDuBqvlDwDzDc30Y+FDcAexRwM/f0=";
   };
 
   pyproject = true;
