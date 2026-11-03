@@ -63,6 +63,7 @@
             opencode = callPackage ./opencode { };
             wa-crypt-tools = callPackage ./wa-crypt-tools { };
             mircrewrr = callPackage ./mircrewrr { };
+            tizenbrew-installer = callPackage ./tizenbrew-installer { };
           };
 
         devShells.default = pkgs.mkShell {
