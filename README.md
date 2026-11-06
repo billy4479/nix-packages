@@ -4,6 +4,22 @@ This repo contains my own nix packages.
 I don't think I'll upstream them to nixpkgs or NUR as they are either a complete hack or not I'm not sure about licensing issues.
 I have this repo for personal use only.
 
+## Packaging
+
+Check Nixpkgs before adding a package and follow its manual for the relevant
+build system. Nixpkgs already provides `opencode`, `t3code`, `tsidp`, and
+`tailscale.derper`; the local packages retain their own versions and customizations.
+
+Prefer standard build helpers and phases, preserve phase hooks, and annotate
+embedded scripts with their language. Use `stdenvNoCC` when no compiler is needed,
+keep build tools out of runtime dependencies, and install only runtime files.
+Native Node.js addons still need a compiler, even when the application is JavaScript.
+
+Before committing, run `nixfmt`, `statix check .`, `deadnix --fail .`, and
+`nix flake check --no-build`. Build changed packages and their `passthru.tests`
+where provided. Compare `nix path-info --closure-size` before and after dependency
+changes rather than assuming the closure is smaller.
+
 ## Updating packages
 
 Every package with an upstream has an `update.sh` next to it (wired up as

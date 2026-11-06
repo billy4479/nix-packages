@@ -11,15 +11,11 @@
   libva,
   libdrm,
   libX11,
-  libXext,
-  libXfixes,
   libxcb,
-  libxdmcp,
   wayland,
   wayland-scanner,
   wayland-protocols,
   gtkmm4,
-  libsysprof-capture,
   libepoxy,
   libpciaccess,
   writeShellScript,
@@ -33,17 +29,17 @@ stdenv.mkDerivation {
     owner = "intel";
     repo = "libvpl-tools";
     rev = "3de25bf3358de6d68633aeb915a2564808197315";
-    sha256 = "sha256-0nE3cAUzdArf1QOsbFhBowaTqTVkNk4ZhJKJz311H6s=";
+    hash = "sha256-0nE3cAUzdArf1QOsbFhBowaTqTVkNk4ZhJKJz311H6s=";
   };
 
   nativeBuildInputs = [
     cmake
     ninja
     pkg-config
+    wayland-scanner
   ];
 
   cmakeFlags = [
-    "-DCMAKE_PREFIX_PATH=${libvpl}"
     "-DENABLE_WAYLAND=ON"
     "-DENABLE_GTK4=ON"
   ];
@@ -53,15 +49,10 @@ stdenv.mkDerivation {
     libva
     libdrm
     libX11
-    libXext
-    libXfixes
     libxcb
-    libxdmcp
     wayland
-    wayland-scanner
     wayland-protocols
     gtkmm4
-    libsysprof-capture
     libepoxy
     libpciaccess
   ];
@@ -72,10 +63,10 @@ stdenv.mkDerivation {
     name = "update-libvpl-tools";
   };
 
-  meta = with lib; {
+  meta = {
     description = "Intel® Video Processing Library (Intel® VPL) Tools";
     homepage = "https://github.com/intel/libvpl-tools";
-    license = licenses.mit;
-    platforms = platforms.linux;
+    license = lib.licenses.mit;
+    platforms = lib.platforms.linux;
   };
 }

@@ -1,32 +1,28 @@
 {
   lib,
   fetchFromGitHub,
-  stdenv,
+  stdenvNoCC,
   makeWrapper,
   python3,
   writeShellScript,
 }:
 
 let
-  pythonEnv = python3.withPackages (ps: with ps; [
-    beautifulsoup4
-    flask
-    lxml
-    requests
-    waitress
-  ]);
+  runtimeDependencies =
+    ps: with ps; [
+      beautifulsoup4
+      flask
+      lxml
+      requests
+      waitress
+    ];
+
+  pythonEnv = python3.withPackages runtimeDependencies;
 
   # The upstream tests need pytest, not part of the runtime environment.
-  pythonTestEnv = python3.withPackages (ps: with ps; [
-    beautifulsoup4
-    flask
-    lxml
-    pytest
-    requests
-    waitress
-  ]);
+  pythonTestEnv = python3.withPackages (ps: runtimeDependencies ps ++ [ ps.pytest ]);
 in
-stdenv.mkDerivation (finalAttrs: {
+stdenvNoCC.mkDerivation {
   pname = "mircrewrr";
   # Upstream tracks the app version by hand in src/admin/routes.py and publishes
   # no tags or releases, so the version follows the newest commit.
@@ -44,24 +40,32 @@ stdenv.mkDerivation (finalAttrs: {
   # Upstream ships no packaging metadata: sources are imported relative to src/
   # and the Docker image runs `python src/main.py`, so install the tree as-is
   # and wrap the interpreter with PYTHONPATH pointing at it.
-  buildCommand = ''
-    install -dm 755 $out/share/mircrewrr
-    cp -r $src/src $out/share/mircrewrr/src
-    chmod -R u+w $out/share/mircrewrr/src
+  dontConfigure = true;
+  dontBuild = true;
 
-    makeWrapper ${pythonEnv}/bin/python $out/bin/mircrewrr \
-      --add-flags "$out/share/mircrewrr/src/main.py" \
-      --set PYTHONPATH "$out/share/mircrewrr/src" \
-      --set-default DATA_DIR /var/lib/mircrewrr
-  '';
+  installPhase = # sh
+    ''
+      runHook preInstall
+
+      install -dm 755 $out/share/mircrewrr
+      cp -r src $out/share/mircrewrr/src
+
+      makeWrapper ${pythonEnv}/bin/python $out/bin/mircrewrr \
+        --add-flags "$out/share/mircrewrr/src/main.py" \
+        --set PYTHONPATH "$out/share/mircrewrr/src" \
+        --set-default DATA_DIR /var/lib/mircrewrr
+
+      runHook postInstall
+    '';
 
   doCheck = true;
   nativeCheckInputs = [ pythonTestEnv ];
-  checkPhase = ''
-    runHook preCheck
-    (cd $src && ${pythonTestEnv}/bin/python -m pytest tests)
-    runHook postCheck
-  '';
+  checkPhase = # sh
+    ''
+      runHook preCheck
+      PYTHONDONTWRITEBYTECODE=1 PYTHONPATH="$PWD/src" python -m pytest tests
+      runHook postCheck
+    '';
 
   passthru = {
     inherit pythonEnv;
@@ -79,4 +83,4 @@ stdenv.mkDerivation (finalAttrs: {
     license = lib.licenses.gpl3;
     mainProgram = "mircrewrr";
   };
-})
+}

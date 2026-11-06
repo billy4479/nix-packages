@@ -1,6 +1,6 @@
 {
   lib,
-  stdenv,
+  stdenvNoCC,
   callPackage,
   fetchFromGitHub,
   fetchNpmDeps,
@@ -11,7 +11,7 @@
 }:
 
 let
-  npmConfigHook = npmHooks.npmConfigHook;
+  inherit (npmHooks) npmConfigHook;
 
   version = "1.1.3";
 
@@ -30,7 +30,7 @@ let
   # single-file binaries; the plain CommonJS sources run as-is, so we skip
   # that entirely. `tizen` is a GitHub tarball pinned by integrity in the
   # lockfile, which fetchNpmDeps verifies.
-  serviceNodeModules = stdenv.mkDerivation {
+  serviceNodeModules = stdenvNoCC.mkDerivation {
     pname = "tizenbrew-installer-service-node-modules";
     inherit version src;
     sourceRoot = "${src.name}/client/services/tizenbrew-installer-service";
@@ -52,14 +52,15 @@ let
 
     dontBuild = true;
 
-    installPhase = ''
-      runHook preInstall
-      cp -R node_modules $out
-      runHook postInstall
-    '';
+    installPhase = # sh
+      ''
+        runHook preInstall
+        cp -R node_modules $out
+        runHook postInstall
+      '';
   };
 in
-stdenv.mkDerivation (finalAttrs: {
+stdenvNoCC.mkDerivation (finalAttrs: {
   pname = "tizenbrew-installer";
   inherit version src;
 
@@ -68,28 +69,29 @@ stdenv.mkDerivation (finalAttrs: {
   dontConfigure = true;
   dontBuild = true;
 
-  installPhase = ''
-    runHook preInstall
+  installPhase = # sh
+    ''
+      runHook preInstall
 
-    root=$out/lib/tizenbrew-installer
-    mkdir -p $out/bin $root/services/tizenbrew-installer-service $root/ui
+      root=$out/lib/tizenbrew-installer
+      mkdir -p $out/bin $root/services/tizenbrew-installer-service $root/ui
 
-    # Mirror the upstream client/ layout: the service statically serves the
-    # folder two levels above its own directory and expects the UI at
-    # ui/dist/index.html.
-    cp -R ${ui} $root/ui/dist
-    cp ${src}/client/services/tizenbrew-installer-service/index.js \
-      $root/services/tizenbrew-installer-service/
-    cp -R ${src}/client/services/tizenbrew-installer-service/utils \
-      $root/services/tizenbrew-installer-service/
-    cp -R ${serviceNodeModules} \
-      $root/services/tizenbrew-installer-service/node_modules
+      # Mirror the upstream client/ layout: the service statically serves the
+      # folder two levels above its own directory and expects the UI at
+      # ui/dist/index.html.
+      cp -R ${ui} $root/ui/dist
+      cp ${src}/client/services/tizenbrew-installer-service/index.js \
+        $root/services/tizenbrew-installer-service/
+      cp -R ${src}/client/services/tizenbrew-installer-service/utils \
+        $root/services/tizenbrew-installer-service/
+      cp -R ${serviceNodeModules} \
+        $root/services/tizenbrew-installer-service/node_modules
 
-    makeWrapper ${lib.getExe nodejs} $out/bin/tizenbrew-installer \
-      --add-flags "$root/services/tizenbrew-installer-service/index.js"
+      makeWrapper ${lib.getExe nodejs} $out/bin/tizenbrew-installer \
+        --add-flags "$root/services/tizenbrew-installer-service/index.js"
 
-    runHook postInstall
-  '';
+      runHook postInstall
+    '';
 
   passthru = {
     inherit ui serviceNodeModules;

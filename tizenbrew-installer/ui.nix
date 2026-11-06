@@ -24,14 +24,15 @@ buildNpmPackage (finalAttrs: {
 
   npmDepsHash = "sha256-bA5fP3WPJFi/mjfqtjsBA26zifzlqQ2nALR6khL3/3s=";
 
-  installPhase = ''
-    runHook preInstall
-    # The output is the vite dist tree itself; the service installs it at
-    # <root>/ui/dist and serves it statically.
-    mkdir $out
-    cp -R dist/. $out/
-    runHook postInstall
-  '';
+  installPhase = # sh
+    ''
+      runHook preInstall
+      # The output is the vite dist tree itself; the service installs it at
+      # <root>/ui/dist and serves it statically.
+      mkdir $out
+      cp -R dist/. $out/
+      runHook postInstall
+    '';
 
   meta = {
     description = "Web UI for the TizenBrew Installer desktop service";

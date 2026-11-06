@@ -1,4 +1,5 @@
 {
+  lib,
   stdenvNoCC,
   fetchFromGitHub,
   writeShellScript,
@@ -19,14 +20,21 @@ stdenvNoCC.mkDerivation {
 
   installPhase = # sh
     ''
-      mkdir -p $out/share/fonts/truetype/Google-Sans
-      chmod 644 *.ttf
-      mv *.ttf $out/share/fonts/truetype/Google-Sans
+      runHook preInstall
+      install -Dm644 *.ttf -t "$out/share/fonts/truetype/Google-Sans"
+      runHook postInstall
     '';
 
   passthru.updateScript = import ../lib/make-update-script.nix {
     inherit writeShellScript;
     pkgPath = ./.;
     name = "update-google-sans";
+  };
+
+  meta = {
+    description = "Google Sans font family";
+    homepage = "https://github.com/hprobotic/Google-Sans-Font";
+    license = lib.licenses.unfree;
+    platforms = lib.platforms.all;
   };
 }
