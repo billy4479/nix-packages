@@ -61,6 +61,7 @@
             searxng-cli = callPackage ./searxng-cli { };
             openchamber-web = callPackage ./openchamber-web { opencode = opencode; };
             opencode = callPackage ./opencode { };
+            t3code = callPackage ./t3code { };
             wa-crypt-tools = callPackage ./wa-crypt-tools { };
             mircrewrr = callPackage ./mircrewrr { };
             tizenbrew-installer = callPackage ./tizenbrew-installer { };
