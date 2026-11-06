@@ -17,9 +17,10 @@ stdenvNoCC.mkDerivation {
 
   dontUnpack = true;
 
-  installPhase = ''
-    runHook preInstall
-    cp -R "${sourceTree.outPath}/." "$out"
-    runHook postInstall
-  '';
+  installPhase = # sh
+    ''
+      runHook preInstall
+      cp -R "${sourceTree.outPath}/." "$out"
+      runHook postInstall
+    '';
 }

@@ -15,9 +15,11 @@
     };
     pyproject-build-systems = {
       url = "github:pyproject-nix/build-system-pkgs";
-      inputs.nixpkgs.follows = "nixpkgs";
-      inputs.pyproject-nix.follows = "pyproject-nix";
-      inputs.uv2nix.follows = "uv2nix";
+      inputs = {
+        nixpkgs.follows = "nixpkgs";
+        pyproject-nix.follows = "pyproject-nix";
+        uv2nix.follows = "uv2nix";
+      };
     };
   };
 
@@ -49,7 +51,7 @@
           rec {
             google-sans = callPackage ./google-sans { };
             prefetch-all-images = callPackage ./prefetch-all-images { };
-            byparr = byparrPackages.byparr;
+            inherit (byparrPackages) byparr;
             byparr-source = byparrPackages.source;
             byparr-python-env = byparrPackages.pythonEnv;
             byparr-stealthfox = byparrPackages.stealthfox;
@@ -59,7 +61,7 @@
             tsidp = callPackage ./tsidp { };
             lunamultiplayer-server = callPackage ./lunamultiplayer-server { };
             searxng-cli = callPackage ./searxng-cli { };
-            openchamber-web = callPackage ./openchamber-web { opencode = opencode; };
+            openchamber-web = callPackage ./openchamber-web { inherit opencode; };
             opencode = callPackage ./opencode { };
             t3code = callPackage ./t3code { };
             wa-crypt-tools = callPackage ./wa-crypt-tools { };

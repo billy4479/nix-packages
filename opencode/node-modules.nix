@@ -56,38 +56,37 @@ stdenvNoCC.mkDerivation {
 
   dontConfigure = true;
 
-  buildPhase = ''
-    runHook preBuild
-    export BUN_INSTALL_CACHE_DIR=$(mktemp -d)
-    bun install \
-      --cpu="${bunCpu}" \
-      --os="${bunOs}" \
-      --filter '!./' \
-      --filter './packages/cli' \
-      --filter './packages/desktop' \
-      --filter './packages/app' \
-      --frozen-lockfile \
-      --ignore-scripts \
-      --no-progress
-    bun --bun ${./scripts/canonicalize-node-modules.ts}
-    bun --bun ${./scripts/normalize-bun-binaries.ts}
-    runHook postBuild
-  '';
+  buildPhase = # sh
+    ''
+      runHook preBuild
+      export BUN_INSTALL_CACHE_DIR=$(mktemp -d)
+      bun install \
+        --cpu="${bunCpu}" \
+        --os="${bunOs}" \
+        --filter '!./' \
+        --filter './packages/cli' \
+        --filter './packages/desktop' \
+        --filter './packages/app' \
+        --frozen-lockfile \
+        --ignore-scripts \
+        --no-progress
+      bun --bun ${./scripts/canonicalize-node-modules.ts}
+      bun --bun ${./scripts/normalize-bun-binaries.ts}
+      runHook postBuild
+    '';
 
-  installPhase = ''
-    runHook preInstall
-    mkdir -p $out
-    find . -type d -name node_modules -exec cp -R --parents {} $out \;
-    runHook postInstall
-  '';
+  installPhase = # sh
+    ''
+      runHook preInstall
+      mkdir -p $out
+      find . -type d -name node_modules -exec cp -R --parents {} $out \;
+      runHook postInstall
+    '';
 
   dontFixup = true;
 
-  outputHashAlgo = "sha256";
   outputHashMode = "recursive";
   outputHash = hash;
-
-  passthru = { inherit src; };
 
   meta.platforms = [
     "aarch64-linux"

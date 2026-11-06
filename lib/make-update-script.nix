@@ -6,7 +6,8 @@
   pkgPath, # the package directory containing update.sh
   name ? "update-script",
 }:
-writeShellScript name ''
-  export UPDATE_COMMON=${./update-common.sh}
-  ${builtins.readFile (pkgPath + "/update.sh")}
-''
+writeShellScript name # sh
+  ''
+    export UPDATE_COMMON=${./update-common.sh}
+    ${builtins.readFile (pkgPath + "/update.sh")}
+  ''

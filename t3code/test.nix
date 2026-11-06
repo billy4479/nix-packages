@@ -13,6 +13,7 @@ runCommand "t3code-web-test"
       nodejs_26
     ];
   }
+  # sh
   ''
     export HOME="$TMPDIR/home"
     mkdir -p "$HOME"

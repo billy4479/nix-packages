@@ -5,7 +5,7 @@
   writeShellScript,
 }:
 
-python3Packages.buildPythonApplication (finalAttrs: {
+python3Packages.buildPythonApplication {
   pname = "wa-crypt-tools";
   # The newest release tag is v0.1.0; master carries version 0.2.0 in
   # pyproject.toml, so the base version follows it and the date marks the
@@ -40,9 +40,10 @@ python3Packages.buildPythonApplication (finalAttrs: {
   ];
 
   # tests/tools-invocation runs the console scripts as subprocesses.
-  preCheck = ''
-    export PATH="$out/bin:$PATH"
-  '';
+  preCheck = # sh
+    ''
+      export PATH="$out/bin:$PATH"
+    '';
 
   passthru.updateScript = import ../lib/make-update-script.nix {
     inherit writeShellScript;
@@ -56,4 +57,4 @@ python3Packages.buildPythonApplication (finalAttrs: {
     license = lib.licenses.gpl3Plus;
     mainProgram = "wadecrypt";
   };
-})
+}

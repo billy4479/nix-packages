@@ -33,19 +33,28 @@ let
             });
 
             "playwright-captcha" =
-              (prev."playwright-captcha".override { sourcePreference = "sdist"; }).overrideAttrs (old: {
-                prePatch = (old.prePatch or "") + ''
-                  sed -i 's/\r$//' playwright_captcha/utils/camoufox_add_init_script/add_init_script.py
-                '';
-                patches = (old.patches or [ ]) ++ [ ./patches/playwright-captcha-writable-addon.patch ];
-                postPatch = (old.postPatch or "") + ''
-                  rm -f playwright_captcha/utils/camoufox_add_init_script/add_init_script.py.orig
-                  rm -rf playwright_captcha/utils/camoufox_add_init_script/__pycache__
-                '';
-                nativeBuildInputs = (old.nativeBuildInputs or [ ]) ++ final.resolveBuildSystem {
-                  setuptools = [ ];
-                };
-              });
+              (prev."playwright-captcha".override { sourcePreference = "sdist"; }).overrideAttrs
+                (old: {
+                  prePatch =
+                    (old.prePatch or "")
+                    # sh
+                    + ''
+                      sed -i 's/\r$//' playwright_captcha/utils/camoufox_add_init_script/add_init_script.py
+                    '';
+                  patches = (old.patches or [ ]) ++ [ ./patches/playwright-captcha-writable-addon.patch ];
+                  postPatch =
+                    (old.postPatch or "")
+                    # sh
+                    + ''
+                      rm -f playwright_captcha/utils/camoufox_add_init_script/add_init_script.py.orig
+                      rm -rf playwright_captcha/utils/camoufox_add_init_script/__pycache__
+                    '';
+                  nativeBuildInputs =
+                    (old.nativeBuildInputs or [ ])
+                    ++ final.resolveBuildSystem {
+                      setuptools = [ ];
+                    };
+                });
           })
         ]
       );

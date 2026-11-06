@@ -30,9 +30,10 @@ rustPlatform.buildRustPackage {
     ./search-only-cli.patch
   ];
 
-  postPatch = ''
-    cp ${./Cargo.lock} Cargo.lock
-  '';
+  postPatch = # sh
+    ''
+      cp ${./Cargo.lock} Cargo.lock
+    '';
 
   nativeBuildInputs = [ pkg-config ];
   buildInputs = [ openssl ];
