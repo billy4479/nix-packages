@@ -94,9 +94,10 @@ stdenvNoCC.mkDerivation {
 
   src = engineArchive;
 
-  nativeBuildInputs = [ patchelf ];
-
-  buildInputs = [ pythonEnv ];
+  nativeBuildInputs = [
+    patchelf
+    pythonEnv
+  ];
 
   dontUnpack = true;
 
@@ -104,56 +105,57 @@ stdenvNoCC.mkDerivation {
   # present in its cache root with a matching stamp, so the store path doubles
   # as INVISIBLE_PLAYWRIGHT_CACHE_DIR. The "engine" symlink gives wrappers a
   # stable path to the versioned directory.
-  installPhase = ''
-    runHook preInstall
+  installPhase = # sh
+    ''
+          runHook preInstall
 
-    facts=$(${pythonEnv}/bin/python -c '
-import json, platform, sys
-from invisible_core.seal import active_seal
-seal = active_seal()
-asset = seal.asset_for(sys.platform, platform.machine())
-print(json.dumps({
-    "dir": f"{seal.tag}_{seal.upstream_version}_{asset.build_id}",
-    "digest": seal.digest,
-    "asset_name": asset.name,
-    "asset_sha256": asset.sha256,
-    "entry_rel": asset.entry_rel,
-}))
-')
-    fact() { printf '%s' "$facts" | ${pythonEnv}/bin/python -c "import json, sys; print(json.load(sys.stdin)['$1'])"; }
+          facts=$(${pythonEnv}/bin/python -c '
+      import json, platform, sys
+      from invisible_core.seal import active_seal
+      seal = active_seal()
+      asset = seal.asset_for(sys.platform, platform.machine())
+      print(json.dumps({
+          "dir": f"{seal.tag}_{seal.upstream_version}_{asset.build_id}",
+          "digest": seal.digest,
+          "asset_name": asset.name,
+          "asset_sha256": asset.sha256,
+          "entry_rel": asset.entry_rel,
+      }))
+      ')
+          fact() { printf '%s' "$facts" | ${pythonEnv}/bin/python -c "import json, sys; print(json.load(sys.stdin)['$1'])"; }
 
-    printf '%s  %s\n' "$(fact asset_sha256)" "$src" | sha256sum -c -
+          printf '%s  %s\n' "$(fact asset_sha256)" "$src" | sha256sum -c -
 
-    engineDir="$out/$(fact dir)"
-    mkdir -p "$engineDir"
-    tar -xf "$src" -C "$engineDir"
+          engineDir="$out/$(fact dir)"
+          mkdir -p "$engineDir"
+          tar -xf "$src" -C "$engineDir"
 
-    STEALTHFOX_ENGINE_DIR="$engineDir" ${pythonEnv}/bin/python -c '
-import os, platform, sys
-from pathlib import Path
-from invisible_core.seal import active_seal, write_stamp
-seal = active_seal()
-asset = seal.asset_for(sys.platform, platform.machine())
-engine_dir = Path(os.environ["STEALTHFOX_ENGINE_DIR"])
-write_stamp(engine_dir, seal, asset=asset.name, asset_sha256=asset.sha256, adopted=False)
-assert (engine_dir / asset.entry_rel).exists(), "engine entry missing after extraction"
-'
+          STEALTHFOX_ENGINE_DIR="$engineDir" ${pythonEnv}/bin/python -c '
+      import os, platform, sys
+      from pathlib import Path
+      from invisible_core.seal import active_seal, write_stamp
+      seal = active_seal()
+      asset = seal.asset_for(sys.platform, platform.machine())
+      engine_dir = Path(os.environ["STEALTHFOX_ENGINE_DIR"])
+      write_stamp(engine_dir, seal, asset=asset.name, asset_sha256=asset.sha256, adopted=False)
+      assert (engine_dir / asset.entry_rel).exists(), "engine entry missing after extraction"
+      '
 
-    entry="$engineDir/$(fact entry_rel)"
-    chmod u+w "$entry"
-    patchelf --set-interpreter "${stdenv.cc.bintools.dynamicLinker}" \
-      --set-rpath "${runtimeLibraryPath}:\$ORIGIN" "$entry"
+          entry="$engineDir/$(fact entry_rel)"
+          chmod u+w "$entry"
+          patchelf --set-interpreter "${stdenv.cc.bintools.dynamicLinker}" \
+            --set-rpath "${runtimeLibraryPath}:\$ORIGIN" "$entry"
 
-    ln -s "$(fact dir)" "$out/engine"
+          ln -s "$(fact dir)" "$out/engine"
 
-    # Per-session font manifests are written to <cache root>/fonts; the store
-    # is read-only, so that one path lives in the runtime cache instead. It is
-    # distinct from the engine's own bundled fonts beside the binary, which
-    # stay in the store and are what the manifest is checked against.
-    ln -s /tmp/byparr-cache/invisible-playwright-fonts "$out/fonts"
+          # Per-session font manifests are written to <cache root>/fonts; the store
+          # is read-only, so that one path lives in the runtime cache instead. It is
+          # distinct from the engine's own bundled fonts beside the binary, which
+          # stay in the store and are what the manifest is checked against.
+          ln -s /tmp/byparr-cache/invisible-playwright-fonts "$out/fonts"
 
-    runHook postInstall
-  '';
+          runHook postInstall
+    '';
 
   passthru = {
     inherit runtimeLibraryPath;
@@ -161,5 +163,6 @@ assert (engine_dir / asset.entry_rel).exists(), "engine entry missing after extr
 
   meta = {
     description = "Patched Firefox engine used by invisible-playwright, laid out as its engine cache";
+    platforms = [ "x86_64-linux" ];
   };
 }

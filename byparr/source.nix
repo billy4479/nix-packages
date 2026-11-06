@@ -16,6 +16,8 @@ stdenvNoCC.mkDerivation {
   passthru.sourcePath = sourceTree.outPath;
 
   dontUnpack = true;
+  # This output is source data, not installed executables.
+  dontFixup = true;
 
   installPhase = # sh
     ''
