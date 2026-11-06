@@ -2,7 +2,7 @@
   bun,
   fetchFromGitHub,
   lib,
-  stdenv,
+  stdenvNoCC,
   writableTmpDirAsHomeHook,
 }:
 
@@ -21,10 +21,8 @@ rec {
       pname,
       hash,
       installFlags ? [ ],
-      nativeBuildInputs ? [ ],
-      copyWorkspaceModules ? false,
     }:
-    stdenv.mkDerivation {
+    stdenvNoCC.mkDerivation {
       pname = "${pname}-node-modules";
       inherit version src;
 
@@ -36,66 +34,54 @@ rec {
       nativeBuildInputs = [
         bun
         writableTmpDirAsHomeHook
-      ] ++ nativeBuildInputs;
+      ];
 
       env.ELECTRON_SKIP_BINARY_DOWNLOAD = "1";
 
       dontConfigure = true;
       dontFixup = true;
 
-      buildPhase = ''
-        runHook preBuild
+      buildPhase = # sh
+        ''
+          runHook preBuild
 
-        export BUN_INSTALL_CACHE_DIR=$(mktemp -d)
-        bun install ${lib.escapeShellArgs installFlags}
+          export BUN_INSTALL_CACHE_DIR=$(mktemp -d)
+          bun install ${lib.escapeShellArgs installFlags}
 
-        runHook postBuild
-      '';
+          runHook postBuild
+        '';
 
-      installPhase = ''
-        runHook preInstall
+      installPhase = # sh
+        ''
+          runHook preInstall
 
-        mkdir -p $out
-        cp -R node_modules $out/node_modules
-        ${lib.optionalString copyWorkspaceModules ''
-          for modules in packages/*/node_modules; do
-            package=$(basename "$(dirname "$modules")")
-            mkdir -p "$out/packages/$package"
-            cp -R "$modules" "$out/packages/$package"
-          done
-        ''}
+          mkdir -p $out
+          cp -R node_modules $out/node_modules
 
-        runHook postInstall
-      '';
+          runHook postInstall
+        '';
 
       outputHashMode = "recursive";
       outputHash = hash;
     };
 
   configureNodeModules =
-    {
-      nodeModules,
-      copyWorkspaceModules ? false,
-    }:
+    { nodeModules }:
+    # sh
     ''
       cp -R ${nodeModules}/node_modules .
-      ${lib.optionalString copyWorkspaceModules ''
-        for modules in ${nodeModules}/packages/*/node_modules; do
-          package=$(basename "$(dirname "$modules")")
-          cp -R "$modules" "packages/$package"
-        done
-      ''}
       chmod -R u+w node_modules
       patchShebangs node_modules
       node fix-deprecation.js
     '';
 
-  installKatexFonts = ''
-    katexFonts=node_modules/katex/dist/fonts
-    if ! test -d "$katexFonts"; then
-      katexFonts=packages/ui/node_modules/katex/dist/fonts
-    fi
-    mkdir -p packages/web/dist/assets/fonts
-    cp -R "$katexFonts"/. packages/web/dist/assets/fonts
-  '';
+  installKatexFonts = # sh
+    ''
+      katexFonts=node_modules/katex/dist/fonts
+      if ! test -d "$katexFonts"; then
+        katexFonts=packages/ui/node_modules/katex/dist/fonts
+      fi
+      mkdir -p packages/web/dist/assets/fonts
+      cp -R "$katexFonts"/. packages/web/dist/assets/fonts
+    '';
 }

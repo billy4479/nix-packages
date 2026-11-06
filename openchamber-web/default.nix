@@ -5,6 +5,7 @@
   makeWrapper,
   node-gyp,
   nodejs,
+  nodejs-slim,
   opencode,
   python3,
   stdenv,
@@ -59,65 +60,84 @@ stdenv.mkDerivation (finalAttrs: {
     writableTmpDirAsHomeHook
   ];
 
-  configurePhase = ''
-    runHook preConfigure
+  configurePhase = # sh
+    ''
+      runHook preConfigure
 
-    ${common.configureNodeModules { nodeModules = finalAttrs.buildNodeModules; }}
+      ${common.configureNodeModules { nodeModules = finalAttrs.buildNodeModules; }}
 
-    runHook postConfigure
-  '';
+      runHook postConfigure
+    '';
 
-  buildPhase = ''
-    runHook preBuild
+  buildPhase = # sh
+    ''
+      runHook preBuild
 
-    bun run --cwd packages/web build
-    ${common.installKatexFonts}
+      bun run --cwd packages/web build
+      ${common.installKatexFonts}
 
-    node_modules/.bin/tsc -p packages/sdk/tsconfig.build.json
+      node_modules/.bin/tsc -p packages/sdk/tsconfig.build.json
 
-    rm -rf node_modules
-    cp -R ${finalAttrs.runtimeNodeModules}/node_modules .
-    chmod -R u+w node_modules
-    rm -f node_modules/.bin/openchamber node_modules/@openchamber/web
-    patchShebangs node_modules
-    node fix-deprecation.js
+      rm -rf node_modules
+      cp -R ${finalAttrs.runtimeNodeModules}/node_modules .
+      chmod -R u+w node_modules
+      rm -f node_modules/.bin/openchamber node_modules/@openchamber/web
+      PATH="${lib.makeBinPath [ nodejs-slim ]}:$PATH" patchShebangs node_modules
+      node fix-deprecation.js
 
-    nodeGyp=(
-      ${lib.getExe nodejs}
-      ${node-gyp}/lib/node_modules/node-gyp/bin/node-gyp.js
-    )
-    nodeGypFlags=(
-      --nodedir=${nodejs}
-      --build-from-source
-      --jobs="''${NIX_BUILD_CORES:-1}"
-    )
-    "''${nodeGyp[@]}" rebuild --directory=node_modules/node-pty "''${nodeGypFlags[@]}"
+      nodeGyp=(
+        ${lib.getExe nodejs}
+        ${node-gyp}/lib/node_modules/node-gyp/bin/node-gyp.js
+      )
+      nodeGypFlags=(
+        --nodedir=${nodejs}
+        --build-from-source
+        --jobs="''${NIX_BUILD_CORES:-1}"
+      )
+      ptyDir=node_modules/node-pty
+      rm -rf "$ptyDir/prebuilds"
+      "''${nodeGyp[@]}" rebuild --directory="$ptyDir" "''${nodeGypFlags[@]}"
+      # Keep the native addon, not node-gyp's build tree and toolchain references.
+      cp "$ptyDir/build/Release/pty.node" "$TMPDIR/pty.node"
+      rm -rf "$ptyDir/build"
+      mkdir -p "$ptyDir/build/Release"
+      mv "$TMPDIR/pty.node" "$ptyDir/build/Release/"
+      find node_modules -type f -name '*.mk' -delete
 
-    runHook postBuild
-  '';
+      runHook postBuild
+    '';
 
-  installPhase = ''
-    runHook preInstall
+  installPhase = # sh
+    ''
+      runHook preInstall
 
-    mkdir -p $out/lib/openchamber-web $out/bin
-    cp -R node_modules $out/lib/openchamber-web/node_modules
-    cp -R packages/web/{bin,dist,public,server,package.json,README.md} $out/lib/openchamber-web
-    mkdir -p $out/lib/openchamber-web/packages/sdk
-    cp -R packages/sdk/{package.json,dist} $out/lib/openchamber-web/packages/sdk/
-    rm -f $out/lib/openchamber-web/node_modules/.bin/openchamber-guest-bundle
+      mkdir -p $out/lib/openchamber-web $out/bin
+      cp -R node_modules $out/lib/openchamber-web/node_modules
+      cp -R packages/web/{bin,dist,public,server,package.json,README.md} $out/lib/openchamber-web
+      mkdir -p $out/lib/openchamber-web/packages/sdk
+      cp -R packages/sdk/{package.json,dist} $out/lib/openchamber-web/packages/sdk/
+      rm -f $out/lib/openchamber-web/node_modules/.bin/openchamber-guest-bundle
 
-    makeWrapper ${lib.getExe nodejs} $out/bin/openchamber \
-      --add-flags $out/lib/openchamber-web/bin/cli.js \
-      --prefix PATH : ${lib.makeBinPath [ opencode ]}
+      makeWrapper ${lib.getExe nodejs-slim} $out/bin/openchamber \
+        --add-flags $out/lib/openchamber-web/bin/cli.js \
+        --prefix PATH : ${lib.makeBinPath [ opencode ]}
 
-    runHook postInstall
-  '';
+      runHook postInstall
+    '';
 
   dontPatchELF = true;
   noAuditTmpdir = true;
 
+  disallowedReferences = [
+    bun
+    nodejs
+    node-gyp
+    python3
+  ];
+
   passthru = {
     inherit (finalAttrs) buildNodeModules runtimeNodeModules;
+    tests.pty = callPackage ./test.nix { openchamber-web = finalAttrs.finalPackage; };
     updateScript = import ../lib/make-update-script.nix {
       inherit writeShellScript;
       pkgPath = ./.;
