@@ -29,6 +29,11 @@ stdenv.mkDerivation (finalAttrs: {
     hash = "sha256-oQLmDCDuJPNBsf8MHMD2xhMq+CF6L836/PQesM91Clw=";
   };
 
+  # Restore persisted Pi sessions before rollback on a fresh runtime.
+  # https://github.com/pingdotgg/t3code/pull/26322
+  # PR head: 2761b809716a1030eca1654e8180db0ad19a728d
+  patches = [ ./pi-rollback.patch ];
+
   pnpmWorkspaces = [
     "@t3tools/monorepo"
     "t3..."
